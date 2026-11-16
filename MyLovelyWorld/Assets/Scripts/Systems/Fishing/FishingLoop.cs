@@ -24,6 +24,7 @@ public class FishingLoop : MonoBehaviour
     void Awake()
     {
         // TODO: generator 생성, judge = new InstantSuccessJudge() (2단계에서 교체)
+        BiteStarted+=BiteStartedUI;
     }
 
     void Update()
@@ -34,21 +35,43 @@ public class FishingLoop : MonoBehaviour
         {
             case FishingState.Casting:
                 // TODO: 입질 추첨 → Waiting
+                SetCasting();
+                ChangeState(FishingState.Waiting);
                 break;
             case FishingState.Waiting:
                 // TODO: 대기 시간 차감 → 0이면 BiteStarted 발행 → Biting
+                stateTimer-=dt;
+                if (stateTimer <= 0){
+                    stateTimer = 0;
+                    BiteStarted?.Invoke(CurrentBite);
+                    ChangeState(FishingState.Biting);
+                }
                 break;
             case FishingState.Biting:
                 // TODO: 낚기 입력 시 judge로 판정 / judge_time_sec 초과 시 TIMEOUT → Resolved
+                ChangeState(FishingState.Resolved);
                 break;
             case FishingState.Resolved:
                 // TODO: 결과 표시 시간 후 → Casting
+                ChangeState(FishingState.Casting);
                 break;
         }
     }
 
     // TODO: 상태 전환 공통 처리 (stateTimer 초기화 등)
-    void ChangeState(FishingState next) { }
+    void ChangeState(FishingState next){
+        stateTimer = (next == FishingState.Waiting) ? CurrentBite.waitTime : 0;
+        state = next;
+    }
+
+    void SetCasting(){
+        
+    }
+
+    void BiteStartedUI(BiteInfo info)
+    {
+        
+    }
 
     // TODO: 라운드 종료 시 호출. 진행 중 입질을 점수 없이 취소하고 루프 정지 (S1)
     public void CancelAndStop() { }

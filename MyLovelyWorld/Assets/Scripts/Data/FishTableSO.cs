@@ -11,8 +11,8 @@ public class FishTableSO : ScriptableObject
         public int id;
         public SizeClass size;
         public string displayName;
-        public float weight;         // 같은 크기 안에서의 추첨 가중치
         public int basePoints;
+        public int weight;
     }
 
     public Row[] rows;

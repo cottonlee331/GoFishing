@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3adc1c4ddf4b09842aac458d8b86e741, type: 3}
+  m_Name: SizeTable
+  m_EditorClassIdentifier: Assembly-CSharp::SizeTableSO
+  rows:
+  - size: 0
+    share: 66
+    waitMin: 2.5
+    waitMax: 4
+    gaugeGain: 10
+    difficulty: 0
+    shadowRatio: 0
+  - size: 1
+    share: 28
+    waitMin: 3
+    waitMax: 7
+    gaugeGain: 20
+    difficulty: 0
+    shadowRatio: 0
+  - size: 2
+    share: 6
+    waitMin: 5
+    waitMax: 9
+    gaugeGain: 40
+    difficulty: 0
+    shadowRatio: 0

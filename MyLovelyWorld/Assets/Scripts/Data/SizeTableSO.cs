@@ -13,8 +13,8 @@ public class SizeTableSO : ScriptableObject
         public float waitMin;
         public float waitMax;
         public float gaugeGain;
-        public float difficulty;     // 난이도 보정 d
-        public float shadowRatio;
+        //public float difficulty;     // 난이도 보정 d
+        //public float shadowRatio;
     }
 
     public Row[] rows;
