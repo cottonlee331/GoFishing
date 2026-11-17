@@ -37,6 +37,7 @@ public class ScoreSystem : MonoBehaviour
     public int[] SharkGoal {get; private set;} = new int[3];    // 청상아리 조합 목표 (어종 id 3개)
     public bool[] SharkProgress {get; private set;} = new bool[3];   // 청상아리 조합 진행도
     public event Action<CatchRecord, int> CatchScored;   // 획득 점수 기록, 총점
+    public event Action<CatchOutcome> CatchResult;   // 포획 성공 여부
 
     void Awake()
     {
@@ -50,7 +51,12 @@ public class ScoreSystem : MonoBehaviour
 
     void OnCatchResolved(BiteInfo bite, JudgeResult result)
     {
-        if (result.outcome != CatchOutcome.Success) return;
+        // 포획 결과 발행
+        CatchOutcome outcome = RollBiteResult(result);
+        CatchResult?.Invoke(outcome);
+        if(outcome != CatchOutcome.Success) return;
+
+        // 포획 성공 시 점수 기록
         CatchRecord record = new CatchRecord();
         record.fishId = bite.fishId;
         record.size = bite.size;
@@ -58,6 +64,8 @@ public class ScoreSystem : MonoBehaviour
         // TODO: 스킬 계수, 부분 점수, 피버 배율 적용
         record.points = sizeTable.Get(bite.size).points+fishTable.Get(bite.fishId).basePoints;
         TotalScore += record.points;
+
+        // 청상아리 조합 진행도 갱신
         for(int i = 0; i < SharkGoal.Length; i++){
             if(bite.fishId == SharkGoal[i] && !SharkProgress[i]){
                 SharkProgress[i] = true;
@@ -82,6 +90,19 @@ public class ScoreSystem : MonoBehaviour
         SharkGoal[1] = fishTable.GetBySize(SizeClass.Medium)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Medium).Length)].id;
         SharkGoal[2] = fishTable.GetBySize(SizeClass.Small)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Small).Length)].id;
         SharkReady = false;
+    }
+
+    CatchOutcome RollBiteResult(JudgeResult result){
+        float probability = config.p0+(config.p2-config.p0)*(result.currentPoint+result.sizePoint)*0.5f;
+        if(probability > config.pMax){
+            probability = config.pMax;
+        }
+
+        float rand = UnityEngine.Random.value;
+        if(rand < probability){
+            return CatchOutcome.Success;
+        }
+        return CatchOutcome.Fail;
     }
 
     // TODO: RoundResult 생성

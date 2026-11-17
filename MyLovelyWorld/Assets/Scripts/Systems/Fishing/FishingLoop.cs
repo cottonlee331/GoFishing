@@ -100,9 +100,6 @@ public class FishingLoop : MonoBehaviour
     void Judge(){
         if(state != FishingState.Biting) return;
         JudgeContext context = default; // TODO: JudgeContext 생성 (S4)
-        context.p_max = config.pMax;
-        context.p0 = config.p0;
-        context.p2 = config.p2;
         CatchResolved?.Invoke(CurrentBite, judge.Judge(context));
         ChangeState(FishingState.Resolved);
     }
@@ -111,7 +108,7 @@ public class FishingLoop : MonoBehaviour
     public void CancelAndStop()
     {
         if(state == FishingState.Biting){
-            CatchResolved?.Invoke(CurrentBite, new JudgeResult{outcome = CatchOutcome.Cancelled});
+            CatchResolved?.Invoke(CurrentBite, new JudgeResult());
         }
         ChangeState(FishingState.Terminated);
     }

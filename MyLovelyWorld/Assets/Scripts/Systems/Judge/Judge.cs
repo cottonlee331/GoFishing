@@ -8,15 +8,13 @@ public struct JudgeContext
     public SizeClass sizeClass;
     public float difficulty;          // sizes.difficulty
     public float forgiveProb;         // 스킬 7 침착 (없으면 0)
-    public float p_max;
-    public float p0;
-    public float p2;
 }
 
 // 판정 출력.
 public struct JudgeResult
 {
-    public CatchOutcome outcome;
+    public float currentPoint;
+    public float sizePoint;
     public bool duringFever;          // 피버 상태 여부
 }
 
@@ -29,21 +27,9 @@ public class JudgeModule
         JudgeResult result = default;
         result.duringFever = false; // TODO: 피버 여부 판정 (S6) 게임 세션 싱글톤 이용
 
-        float currentPoint = ScoreKey(context.currentKey, (int)context.currentLevel);
-        float sizePoint = ScoreKey(context.sizeKey,(int)context.sizeClass);
+        result.currentPoint = ScoreKey(context.currentKey, (int)context.currentLevel);
+        result.sizePoint = ScoreKey(context.sizeKey,(int)context.sizeClass);
 
-        float probability = context.p0+(context.p2-context.p0)*(currentPoint+sizePoint)*0.5f;
-        if(probability > context.p_max){
-            probability = context.p_max;
-        }
-
-        float rand = UnityEngine.Random.value;
-        if(rand < probability){
-            result.outcome = CatchOutcome.Success;
-        }
-        else{
-            result.outcome = CatchOutcome.Fail;
-        }
         return result;
     }
 
