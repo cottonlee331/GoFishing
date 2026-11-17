@@ -15,11 +15,39 @@ public class FeverSystem : MonoBehaviour
     public event Action FeverEnded;
     public event Action<float> GaugeChanged;
 
-    // TODO: 성공 포획 시 게이지 증가 (피버 중 제외, 초과분 버림)
-    void OnCatchResolved(BiteInfo bite, JudgeResult result) { }
+    public void OnCatchResult(CatchOutcome outcome, SizeClass size)
+    {
+        if (IsFever) return;
+        if (outcome != CatchOutcome.Success) return;
+
+        Gauge += sizeTable.Get(size).gaugeGain;
+        GaugeChanged?.Invoke(Gauge);
+        if (Gauge >= config.gaugeMax){
+            Gauge = config.gaugeMax;
+            StartFever();
+        }
+    }
 
     void Update()
     {
-        // TODO: 피버 남은 시간 차감 (실시간)
+        if (IsFever){
+            FeverRemaining -= Time.unscaledDeltaTime;
+            if (FeverRemaining <= 0)
+            {
+                EndFever();
+            }
+        }
+    }
+
+    void StartFever(){
+        IsFever = true;
+        FeverRemaining = config.feverDurationSec;
+        FeverStarted?.Invoke(FeverRemaining);
+    }
+
+    void EndFever(){
+        IsFever = false;
+        Gauge = 0f;
+        FeverEnded?.Invoke();
     }
 }

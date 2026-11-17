@@ -12,7 +12,7 @@ public class GameConfigSO : ScriptableObject
     public float confirmLockSec = 0.3f;
     public float p0 = 0.30f;
     public float p2 = 0.90f;
-    public float pMax = 0.95f;
+    public float pMax = 1f;
     public float partialScore = 0.5f;
 
     [Header("Bite")]
@@ -21,7 +21,7 @@ public class GameConfigSO : ScriptableObject
 
     [Header("Current")]
     public float currentPeriodSec = 30f;
-    public float currentWarnSec = 0.5f;
+    //public float currentWarnSec = 0.5f;
 
     [Header("Fever")]
     public float gaugeMax = 100f;
@@ -30,6 +30,5 @@ public class GameConfigSO : ScriptableObject
     public float feverWaitMult = 0.6f;
 
     [Header("Shark / Ending")]
-    public int sharkPoints = 250;
     public int manseonThreshold = 600;
 }

@@ -7,6 +7,7 @@ public class FishingLoop : MonoBehaviour
     [SerializeField] GameConfigSO config;
     [SerializeField] SizeTableSO sizeTable;
     [SerializeField] FishTableSO fishTable;
+    [SerializeField] FeverSystem feverSystem;
 
     [Header("Debug (read only)")]
     [SerializeField] FishingState state;
@@ -15,21 +16,20 @@ public class FishingLoop : MonoBehaviour
     public FishingState State => state;
     public BiteInfo CurrentBite { get; private set; }
 
+    public CurrentLevel CurrentWave {get; private set;}
+
     public event Action<BiteInfo> BiteStarted;                    // → S2, UI
     public event Action<BiteInfo, JudgeResult> CatchResolved;     // → S5, S6, UI
 
-    BiteGenerator generator;
     JudgeModule judge;
+    JudgeInputQueue judgeQueue;
+    BiteGenerator generator;
 
     void Awake()
     {
         judge = new JudgeModule();
+        judgeQueue = new JudgeInputQueue();
         generator = new BiteGenerator(sizeTable, fishTable, config);
-    }
-
-    void Start()
-    {
-        Begin();
     }
 
     void Update()
@@ -93,13 +93,18 @@ public class FishingLoop : MonoBehaviour
     }
 
     void SetBite(){
-        // 추후 피버타임, 스킬 등으로 인한 waitMultiplier 적용 구현 필요
-        CurrentBite = generator.Generate();
+        float waitMultiplier = 1f;
+        if(feverSystem.IsFever) waitMultiplier *= config.feverWaitMult;
+        // TODO: 스킬로 인한 waitMultiplier 보정은 추후 구현
+        CurrentBite = generator.Generate(waitMultiplier);
     }
 
     void Judge(){
         if(state != FishingState.Biting) return;
-        JudgeContext context = default; // TODO: JudgeContext 생성 (S4)
+        JudgeContext context = default; 
+        (context.currentKey, context.sizeKey) = judgeQueue.Peek();
+        context.currentLevel = CurrentWave;
+        context.duringFever = feverSystem.IsFever;
         CatchResolved?.Invoke(CurrentBite, judge.Judge(context));
         ChangeState(FishingState.Resolved);
     }
@@ -117,5 +122,10 @@ public class FishingLoop : MonoBehaviour
     public void Begin()
     {
         ChangeState(FishingState.Casting);
+        CurrentWave = CurrentLevel.Normal;
+        OnWaveChange();
+    }
+    public void OnWaveChange(){
+        CurrentWave = (CurrentLevel)UnityEngine.Random.Range(0, 3);
     }
 }

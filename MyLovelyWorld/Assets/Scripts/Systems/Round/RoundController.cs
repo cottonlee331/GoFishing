@@ -5,14 +5,33 @@ using UnityEngine;
 public class RoundTimer
 {
     public float Remaining { get; private set; }
+    public float WaveRemaining { get; private set; }   // 물살 변화까지 남은 시간
     public bool IsExpired => Remaining <= 0f;
     public event Action Expired;
+    public event Action Wave;
 
-    // TODO: round_time_sec로 시작
-    public void Start(float seconds) { }
+    float WaveSeconds;
+
+    public void Start(float seconds, float waveSeconds){
+        Remaining = seconds;
+        WaveRemaining = waveSeconds;
+        WaveSeconds = waveSeconds;
+    }
 
     // TODO: 실시간 dt 차감, 0 도달 시 Expired 한 번 발행
-    public void Tick(float unscaledDt) { }
+    public void Tick(float unscaledDt){
+        //if (IsExpired) return;
+        Remaining -= unscaledDt;
+        WaveRemaining -= unscaledDt;
+        if (Remaining <= 0f){
+            Remaining = 0f;
+            Expired?.Invoke();
+        }
+        if(WaveRemaining <= 0f){
+            Wave?.Invoke();
+            WaveRemaining = WaveSeconds;
+        }
+    }
 }
 
 // S1. Play 씬의 라운드 상태(Playing → Ending) 관리. 다른 시스템을 시작·종료시킨다.
@@ -21,6 +40,7 @@ public class RoundController : MonoBehaviour
     [SerializeField] GameConfigSO config;
     [SerializeField] FishingLoop fishingLoop;
     [SerializeField] FeverSystem feverSystem;
+    [SerializeField] ScoreSystem scoreSystem;
 
     [Header("Debug (read only)")]
     [SerializeField] RoundState state;
@@ -32,25 +52,31 @@ public class RoundController : MonoBehaviour
 
     void OnEnable()
     {
+        RoundStarted += StartRound;
         timer = new RoundTimer();
         timer.Expired += EndRound;
+        timer.Wave += fishingLoop.OnWaveChange;
+        feverSystem.FeverEnded += EndRound;
     }
     void Start()
     {
-        // TODO: 라운드 시작 (타이머, 물살, 루프 시작)
         RoundStarted?.Invoke();
     }
 
-    void Update()
-    {
-        // TODO: 타이머 Tick, 종료 조건 검사 (타이머 0 && 피버 아님)
+    void Update(){
+        timer.Tick(Time.unscaledDeltaTime);
+    }
+
+    void StartRound(){
+        timer.Start(config.roundTimeSec, config.currentPeriodSec);
+        fishingLoop.Begin();
     }
 
     // TODO: 진행 중 입질 취소 → Ending 연출 → Result 씬으로
-    void EndRound()
-    {
-        RoundResult result = new RoundResult();
-        result.totalScore = 0; // TODO: 점수 합산
+    void EndRound(){
+        if(!timer.IsExpired) return;   // 타이머 만료 전이면 종료 무시
+        if(feverSystem.IsFever) return;   // 피버 중이면 종료 지연
+        RoundResult result = scoreSystem.BuildResult();
         RoundEnded?.Invoke(result);
     }
 }

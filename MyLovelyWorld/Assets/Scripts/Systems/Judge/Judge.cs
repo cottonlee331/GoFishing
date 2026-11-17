@@ -6,6 +6,7 @@ public struct JudgeContext
     public JudgeKey? sizeKey;         // 큐 2번째 = 어종 판단
     public CurrentLevel currentLevel; // 확정 시점의 물살
     public SizeClass sizeClass;
+    public  bool duringFever;          // 피버 상태 여부
     public float difficulty;          // sizes.difficulty
     public float forgiveProb;         // 스킬 7 침착 (없으면 0)
 }
@@ -25,7 +26,7 @@ public class JudgeModule
     public JudgeResult Judge(in JudgeContext context)
     {
         JudgeResult result = default;
-        result.duringFever = false; // TODO: 피버 여부 판정 (S6) 게임 세션 싱글톤 이용
+        result.duringFever = context.duringFever;
 
         result.currentPoint = ScoreKey(context.currentKey, (int)context.currentLevel);
         result.sizePoint = ScoreKey(context.sizeKey,(int)context.sizeClass);
