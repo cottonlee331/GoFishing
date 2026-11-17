@@ -1,5 +1,5 @@
 ﻿// 게임 전반에서 공유하는 열거형.
-public enum SizeClass { Small, Medium, Large }          // 소 / 중 / 대
+public enum SizeClass { Small, Medium, Large, Shark }          // 소 / 중 / 대
 
 public enum CurrentLevel { Strong, Normal, Weak }       // 물살: 강 / 보통 / 약
 
@@ -8,6 +8,6 @@ public enum JudgeKey { Power, Steady, Delicate }        // 강력 / 무난 / 섬
 
 public enum CatchOutcome { Success, Fail, Timeout, Cancelled }
 
-public enum FishingState { Casting, Waiting, Biting, Resolved }
+public enum FishingState { Casting, Waiting, Biting, Resolved, Terminated }
 
 public enum RoundState { Playing, Ending }
