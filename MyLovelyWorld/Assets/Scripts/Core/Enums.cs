@@ -1,5 +1,5 @@
 ﻿// 게임 전반에서 공유하는 열거형.
-public enum SizeClass { Small, Medium, Large, Shark }          // 소 / 중 / 대
+public enum SizeClass { Large, Medium, Small, Shark }          // 대 / 중 / 소 / 상어
 
 public enum CurrentLevel { Strong, Normal, Weak }       // 물살: 강 / 보통 / 약
 

@@ -57,6 +57,7 @@ public class ScoreSystem : MonoBehaviour
         record.duringFever = result.duringFever;
         // TODO: 스킬 계수, 부분 점수, 피버 배율 적용
         record.points = sizeTable.Get(bite.size).points+fishTable.Get(bite.fishId).basePoints;
+        TotalScore += record.points;
         for(int i = 0; i < SharkGoal.Length; i++){
             if(bite.fishId == SharkGoal[i] && !SharkProgress[i]){
                 SharkProgress[i] = true;
@@ -77,9 +78,9 @@ public class ScoreSystem : MonoBehaviour
     void InitSharkGoal()
     {
         // 스킬에 의한 조합 변경은 추후 구현
-        SharkGoal[0] = UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Large).Length);
-        SharkGoal[1] = UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Medium).Length);
-        SharkGoal[2] = UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Small).Length);
+        SharkGoal[0] = fishTable.GetBySize(SizeClass.Large)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Large).Length)].id;
+        SharkGoal[1] = fishTable.GetBySize(SizeClass.Medium)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Medium).Length)].id;
+        SharkGoal[2] = fishTable.GetBySize(SizeClass.Small)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Small).Length)].id;
         SharkReady = false;
     }
 
