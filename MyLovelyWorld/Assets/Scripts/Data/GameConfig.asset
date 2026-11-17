@@ -17,7 +17,7 @@ MonoBehaviour:
   confirmLockSec: 0.3
   p0: 0.3
   p2: 0.9
-  pMax: 0.95
+  pMax: 1
   partialScore: 0.5
   shadowNoise: 0.15
   resultTimeSec: 1

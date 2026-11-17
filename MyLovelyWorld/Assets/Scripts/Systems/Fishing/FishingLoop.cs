@@ -19,12 +19,17 @@ public class FishingLoop : MonoBehaviour
     public event Action<BiteInfo, JudgeResult> CatchResolved;     // → S5, S6, UI
 
     BiteGenerator generator;
-    IJudgeModule judge;
+    JudgeModule judge;
 
     void Awake()
     {
-        // TODO: generator 생성, judge = new InstantSuccessJudge() (2단계에서 교체)
-        BiteStarted+=BiteStartedUI;
+        judge = new JudgeModule();
+        generator = new BiteGenerator(sizeTable, fishTable, config);
+    }
+
+    void Start()
+    {
+        Begin();
     }
 
     void Update()
@@ -35,47 +40,85 @@ public class FishingLoop : MonoBehaviour
         {
             case FishingState.Casting:
                 // TODO: 입질 추첨 → Waiting
-                SetCasting();
+                SetBite();
                 ChangeState(FishingState.Waiting);
                 break;
             case FishingState.Waiting:
                 // TODO: 대기 시간 차감 → 0이면 BiteStarted 발행 → Biting
                 stateTimer-=dt;
                 if (stateTimer <= 0){
-                    stateTimer = 0;
                     BiteStarted?.Invoke(CurrentBite);
                     ChangeState(FishingState.Biting);
                 }
                 break;
             case FishingState.Biting:
                 // TODO: 낚기 입력 시 judge로 판정 / judge_time_sec 초과 시 TIMEOUT → Resolved
-                ChangeState(FishingState.Resolved);
+                stateTimer -= dt;
+                if (stateTimer <= 0){
+                    Judge();
+                }
                 break;
             case FishingState.Resolved:
                 // TODO: 결과 표시 시간 후 → Casting
-                ChangeState(FishingState.Casting);
+                stateTimer -= dt;
+                if(stateTimer <= 0){
+                    ChangeState(FishingState.Casting);
+                }
+                break;
+            case FishingState.Terminated:
                 break;
         }
     }
 
     // TODO: 상태 전환 공통 처리 (stateTimer 초기화 등)
     void ChangeState(FishingState next){
-        stateTimer = (next == FishingState.Waiting) ? CurrentBite.waitTime : 0;
+        switch (next){
+            case FishingState.Waiting:
+                stateTimer = CurrentBite.waitTime;
+                break;
+            case FishingState.Biting:
+                stateTimer = config.judgeTimeSec;
+                // 스킬에 의한 연장 가능성은 추후 구현
+                break;
+            case FishingState.Resolved:
+                stateTimer = config.resultTimeSec;
+                // 결과 저장 및 UI 추가 필요
+                break;
+            default:
+                stateTimer = 0;
+                break;
+
+        }
         state = next;
     }
 
-    void SetCasting(){
-        
+    void SetBite(){
+        // 추후 피버타임, 스킬 등으로 인한 waitMultiplier 적용 구현 필요
+        CurrentBite = generator.Generate();
     }
 
-    void BiteStartedUI(BiteInfo info)
-    {
-        
+    void Judge(){
+        if(state != FishingState.Biting) return;
+        JudgeContext context = default; // TODO: JudgeContext 생성 (S4)
+        context.p_max = config.pMax;
+        context.p0 = config.p0;
+        context.p2 = config.p2;
+        CatchResolved?.Invoke(CurrentBite, judge.Judge(context));
+        ChangeState(FishingState.Resolved);
     }
 
     // TODO: 라운드 종료 시 호출. 진행 중 입질을 점수 없이 취소하고 루프 정지 (S1)
-    public void CancelAndStop() { }
+    public void CancelAndStop()
+    {
+        if(state == FishingState.Biting){
+            CatchResolved?.Invoke(CurrentBite, new JudgeResult{outcome = CatchOutcome.Cancelled});
+        }
+        ChangeState(FishingState.Terminated);
+    }
 
     // TODO: 라운드 시작 시 호출. 루프 시작
-    public void Begin() { }
+    public void Begin()
+    {
+        ChangeState(FishingState.Casting);
+    }
 }

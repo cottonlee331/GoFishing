@@ -1,2 +1,14 @@
 fileFormatVersion: 2
 guid: 8821530427d1c3e418ea19045db3164d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - config: {fileID: 11400000, guid: b351440eb454ca14c86f383cdb63fe3e, type: 2}
+  - sizeTable: {fileID: 11400000, guid: 164abd44cf9acc44b87625630c3fe023, type: 2}
+  - fishTable: {fileID: 11400000, guid: d5c695d6195f00c4eaa18fdf37e7d96c, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

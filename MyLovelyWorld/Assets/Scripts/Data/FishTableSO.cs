@@ -18,5 +18,16 @@ public class FishTableSO : ScriptableObject
     public Row[] rows;
 
     // TODO: id로 Row 찾기
-    public Row Get(int id) => throw new NotImplementedException();
+    public Row Get(int id){
+        foreach (var row in rows)
+        {
+            if (row.id == id)
+                return row;
+        }
+        throw new Exception($"FishTableSO.Get({id}) not found");
+    }
+
+    public Row[] GetBySize(SizeClass size){
+        return Array.FindAll(rows, row => row.size == size);
+    }
 }

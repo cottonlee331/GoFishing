@@ -15,22 +15,25 @@ MonoBehaviour:
   rows:
   - size: 0
     share: 66
-    waitMin: 2.5
+    waitMin: 1.5
     waitMax: 4
     gaugeGain: 10
-    difficulty: 0
-    shadowRatio: 0
+    points: 100
   - size: 1
     share: 28
     waitMin: 3
     waitMax: 7
     gaugeGain: 20
-    difficulty: 0
-    shadowRatio: 0
+    points: 200
   - size: 2
     share: 6
     waitMin: 5
     waitMax: 9
     gaugeGain: 40
-    difficulty: 0
-    shadowRatio: 0
+    points: 300
+  - size: 3
+    share: 0
+    waitMin: 10
+    waitMax: 10
+    gaugeGain: 0
+    points: 500
