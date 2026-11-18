@@ -20,10 +20,12 @@ public class FishingLoop : MonoBehaviour
 
     public event Action<BiteInfo> BiteStarted;                    // → S2, UI
     public event Action<BiteInfo, JudgeResult> CatchResolved;     // → S5, S6, UI
+    public event Action<CurrentLevel> CurrentChanged;
 
     JudgeModule judge;
     JudgeInputQueue judgeQueue;
     BiteGenerator generator;
+    bool isShark = false;   // 다음 입질이 청상아리
 
     void Awake()
     {
@@ -78,10 +80,12 @@ public class FishingLoop : MonoBehaviour
                 break;
             case FishingState.Biting:
                 stateTimer = config.judgeTimeSec;
+                judgeQueue.Open();
                 // 스킬에 의한 연장 가능성은 추후 구현
                 break;
             case FishingState.Resolved:
                 stateTimer = config.resultTimeSec;
+                judgeQueue.Close();
                 // 결과 저장 및 UI 추가 필요
                 break;
             default:
@@ -96,11 +100,13 @@ public class FishingLoop : MonoBehaviour
         float waitMultiplier = 1f;
         if(feverSystem.IsFever) waitMultiplier *= config.feverWaitMult;
         // TODO: 스킬로 인한 waitMultiplier 보정은 추후 구현
-        CurrentBite = generator.Generate(waitMultiplier);
+        CurrentBite = generator.Generate(waitMultiplier,isShark);
+        isShark = false;
     }
 
     void Judge(){
         if(state != FishingState.Biting) return;
+        Debug.Log("Judge Confirm");
         JudgeContext context = default; 
         (context.currentKey, context.sizeKey) = judgeQueue.Peek();
         context.currentLevel = CurrentWave;
@@ -127,5 +133,23 @@ public class FishingLoop : MonoBehaviour
     }
     public void OnWaveChange(){
         CurrentWave = (CurrentLevel)UnityEngine.Random.Range(0, 3);
+        CurrentChanged?.Invoke(CurrentWave);
+    }
+    public void SetNextBiteShark(){
+        isShark = true;
+    }
+
+    public (float,float) GetBiteTimer(){
+        return (stateTimer,config.judgeTimeSec);
+    }
+
+    public void JudgeButton(JudgeKey key){
+        judgeQueue.Push(key);
+        Debug.Log("물살:"+judgeQueue.Peek().current+" 어종:"+judgeQueue.Peek().size);
+    }
+
+    public void ConfirmButton()
+    {
+        Judge();
     }
 }

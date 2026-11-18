@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 // 2단계. 판정 키 2칸 FIFO 큐. 입질 중에만 입력을 받는다.
 public class JudgeInputQueue

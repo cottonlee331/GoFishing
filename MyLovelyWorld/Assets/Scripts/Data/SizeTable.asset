@@ -14,19 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SizeTableSO
   rows:
   - size: 0
-    share: 66
+    share: 1
     waitMin: 1.5
     waitMax: 4
     gaugeGain: 10
     points: 100
   - size: 1
-    share: 28
+    share: 1
     waitMin: 3
     waitMax: 7
     gaugeGain: 20
     points: 200
   - size: 2
-    share: 6
+    share: 1
     waitMin: 5
     waitMax: 9
     gaugeGain: 40

@@ -27,9 +27,15 @@ public class BiteGenerator
     }
 
     // TODO: 아래 단계를 순서대로 호출해 BiteInfo 하나를 만든다.
-    public BiteInfo Generate() => Generate(1f);
-    public BiteInfo Generate(float waitMultiplier){
+    public BiteInfo Generate() => Generate(1f,false);
+    public BiteInfo Generate(float waitMultiplier,bool isShark){
         BiteInfo biteInfo = default;
+        if(isShark){
+            biteInfo.size = SizeClass.Shark;
+            biteInfo.fishId = fishTable.GetBySize(SizeClass.Shark).First().id;
+            biteInfo.waitTime = DrawWaitTime(biteInfo.size, waitMultiplier);
+            return biteInfo;
+        }
         biteInfo.size = DrawSize();
         biteInfo.fishId = DrawFish(biteInfo.size);
         biteInfo.waitTime = DrawWaitTime(biteInfo.size, waitMultiplier);

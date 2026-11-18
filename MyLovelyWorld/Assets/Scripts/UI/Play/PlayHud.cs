@@ -1,4 +1,6 @@
-﻿using TMPro;
+using TMPro;
+using Unity.Burst.CompilerServices;
+using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,16 +12,20 @@ public class PlayHud : MonoBehaviour
     [SerializeField] RoundController round;
     [SerializeField] ScoreSystem score;
     [SerializeField] FeverSystem fever;
-    [SerializeField] CurrentSystem current;
+    [SerializeField] FishingLoop loop;
     [SerializeField] SkillTableSO skillTable;
+    [SerializeField] GameConfigSO config;
 
     [Header("Timer / Score")]
     [SerializeField] TMP_Text timerText;
     [SerializeField] TMP_Text scoreText;
 
     [Header("Fever")]
-    [SerializeField] Image feverGaugeFill;
+    [SerializeField] Slider feverGaugeFill;
     [SerializeField] TMP_Text feverText;
+
+    [Header("Bite Popup")]
+    [SerializeField] GameObject bitePopup;
 
     [Header("Catch log")]
     [SerializeField] Transform catchLogRoot;
@@ -29,7 +35,7 @@ public class PlayHud : MonoBehaviour
     [SerializeField] Image[] sharkSlots = new Image[3];
 
     [Header("Current")]
-    [SerializeField] TMP_Text currentText;
+    [SerializeField] GameObject currentObj;
 
     [Header("Equipped skills")]
     [SerializeField] Image[] skillIcons = new Image[3];
@@ -37,33 +43,52 @@ public class PlayHud : MonoBehaviour
     [Header("Ending")]
     [SerializeField] GameObject endingBanner;
 
-    void OnEnable()
-    {
-        // TODO: 이벤트 구독 (score.CatchScored, fever.GaugeChanged/FeverStarted/FeverEnded,
-        //       current.CurrentChanged/CurrentWarning, round.RoundEnded)
+    void OnEnable(){
+        score.CatchScored += OnCatchScored;
+        fever.GaugeChanged += OnGaugeChanged;
+        fever.FeverStarted += OnFeverStarted;
+        fever.FeverEnded += OnFeverEnded;
+        loop.CurrentChanged += OnCurrentChanged;
+        loop.BiteStarted+= OnBiteStarted;
+        loop.CatchResolved += OnCatchResolved;
+        round.RoundStarted += OnRoundStarted;
+        round.RoundEnded += OnRoundEnded;
     }
 
-    void OnDisable()
-    {
-        // TODO: OnEnable에서 구독한 이벤트 모두 해제
+    void OnDisable(){
+        score.CatchScored -= OnCatchScored;
+        fever.GaugeChanged -= OnGaugeChanged;
+        fever.FeverStarted -= OnFeverStarted;
+        fever.FeverEnded -= OnFeverEnded;
+        loop.CurrentChanged -= OnCurrentChanged;
+        round.RoundEnded -= OnRoundEnded;
     }
 
     void Start()
     {
         // TODO: 장착 스킬 아이콘(GameSession.SelectedSkillIds), 초기값 표시, endingBanner 숨김
+        foreach(Transform child in catchLogRoot) Destroy(child.gameObject);
+        timerText.text = FormatTime(0);
+        scoreText.text = "0 점";
+        feverGaugeFill.value = 0;
+        bitePopup.SetActive(false);
     }
 
-    void Update()
-    {
-        // TODO: 남은 시간 표시 (RoundController에 남은 시간 공개 프로퍼티 필요)
-        //       피버 중 타이머가 0이면 0:00 고정 + 피버 남은 시간 표시
+    void Update(){
+        timerText.text = FormatTime(round.GetRoundTime());
     }
 
     // TODO: 점수 갱신, 포획 목록 항목 추가, 청상아리 칸 갱신
-    void OnCatchScored(CatchRecord record, int totalScore) { }
+    void OnCatchScored(CatchRecord record, int totalScore) {
+        scoreText.text = totalScore.ToString()+" 점";
+        GameObject obj = Instantiate(catchLogItemPrefab,catchLogRoot);
+        obj.GetComponent<ScoreUnitPrefab>().InitPrefab(record.fishId,record.duringFever);
+    }
 
     // TODO: 게이지 비율 표시
-    void OnGaugeChanged(float gauge) { }
+    void OnGaugeChanged(float gauge) {
+        feverGaugeFill.value = gauge/config.gaugeMax;
+    }
 
     // TODO: 피버 표시로 전환
     void OnFeverStarted(float duration) { }
@@ -71,15 +96,36 @@ public class PlayHud : MonoBehaviour
     // TODO: 게이지 표시로 복귀
     void OnFeverEnded() { }
 
+    void OnBiteStarted(BiteInfo bite){
+        bitePopup.SetActive(true);
+    }
+
+    void OnCatchResolved(BiteInfo bite, JudgeResult judge)
+    {
+        bitePopup.SetActive(false);
+    }
     // TODO: 물살 단계 표시
-    void OnCurrentChanged(CurrentLevel level) { }
+    void OnCurrentChanged(CurrentLevel level) {
+        // TODO: 물살 오브젝트 Sprite 변경
+    }
 
     // TODO: 물살 변화 예고 깜빡임
     void OnCurrentWarning(float remaining) { }
 
+    void OnRoundStarted() {
+    }
     // TODO: "오늘 고기잡이 종료!" 표시
     void OnRoundEnded(RoundResult result) { }
 
     // TODO: 초 → "m:ss"
-    static string FormatTime(float seconds) => throw new System.NotImplementedException();
+    static string FormatTime(float seconds){
+        string timeString = "";
+        int min = (int)seconds/60;
+        int sec = (int)seconds%60;
+        if(min<10) timeString+="0";
+        timeString+=min.ToString()+":";
+        if(sec<10) timeString+="0";
+        timeString+=sec.ToString();
+        return timeString;
+    }
 }

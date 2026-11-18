@@ -89,6 +89,9 @@ public class ScoreSystem : MonoBehaviour
                     }
                     SharkReady = true;
                 }
+                if(SharkReady){
+                    loop.SetNextBiteShark();
+                }
             }
         }
         records.Add(record);
@@ -101,6 +104,9 @@ public class ScoreSystem : MonoBehaviour
         SharkGoal[0] = fishTable.GetBySize(SizeClass.Large)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Large).Length)].id;
         SharkGoal[1] = fishTable.GetBySize(SizeClass.Medium)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Medium).Length)].id;
         SharkGoal[2] = fishTable.GetBySize(SizeClass.Small)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Small).Length)].id;
+        SharkProgress[0] = false;
+        SharkProgress[1] = false;
+        SharkProgress[2] = false;
         SharkReady = false;
     }
 
@@ -110,8 +116,9 @@ public class ScoreSystem : MonoBehaviour
             probability = config.pMax;
         }
 
-        float rand = UnityEngine.Random.value;
-        if(rand < probability){
+        int rand = UnityEngine.Random.Range(1,100);
+        Debug.Log("확률:"+probability*100+"주사위:"+rand);
+        if(rand < probability*100){
             return CatchOutcome.Success;
         }
         return CatchOutcome.Fail;

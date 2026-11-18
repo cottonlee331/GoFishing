@@ -14,17 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FishTableSO
   rows:
   - id: 0
+    size: 3
+    displayName: "\uCCAD\uC0C1\uC544\uB9AC"
+    basePoints: 100
+    weight: 0
+  - id: 1
     size: 0
     displayName: "\uC18C\uD615\uBB3C\uACE0\uAE30"
     basePoints: 10
-    weight: 0
-  - id: 1
+    weight: 30
+  - id: 2
     size: 1
     displayName: "\uC911\uD615\uBB3C\uACE0\uAE30"
     basePoints: 50
-    weight: 0
-  - id: 2
+    weight: 30
+  - id: 3
     size: 2
     displayName: "\uB300\uD615\uBB3C\uACE0\uAE30"
-    basePoints: 100
-    weight: 0
+    basePoints: 30
+    weight: 30

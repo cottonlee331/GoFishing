@@ -48,7 +48,7 @@ public class RoundController : MonoBehaviour
     public event Action RoundStarted;
     public event Action<RoundResult> RoundEnded;
 
-    RoundTimer timer;
+    public RoundTimer timer{get; private set;}
 
     void OnEnable()
     {
@@ -78,5 +78,9 @@ public class RoundController : MonoBehaviour
         if(feverSystem.IsFever) return;   // 피버 중이면 종료 지연
         RoundResult result = scoreSystem.BuildResult();
         RoundEnded?.Invoke(result);
+    }
+
+    public float GetRoundTime(){
+        return timer.Remaining;
     }
 }
