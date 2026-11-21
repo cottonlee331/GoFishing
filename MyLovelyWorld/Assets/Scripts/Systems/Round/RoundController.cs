@@ -76,7 +76,9 @@ public class RoundController : MonoBehaviour
     void EndRound(){
         if(!timer.IsExpired) return;   // 타이머 만료 전이면 종료 무시
         if(feverSystem.IsFever) return;   // 피버 중이면 종료 지연
+        fishingLoop.CancelAndStop();
         RoundResult result = scoreSystem.BuildResult();
+        GameSession.Instance.SetLastResult(result);
         RoundEnded?.Invoke(result);
     }
 

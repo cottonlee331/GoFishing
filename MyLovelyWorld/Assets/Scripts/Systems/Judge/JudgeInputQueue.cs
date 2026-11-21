@@ -18,8 +18,8 @@ public class JudgeInputQueue
         if(queue[0] == null) queue[0] = key;
         else if(queue[1] == null) queue[1] = key;
         else{
-            queue[1] = queue[0];
-            queue[0] = key;
+            queue[0] = queue[1];
+            queue[1] = key;
         }
         Changed?.Invoke();
     }

@@ -28,11 +28,20 @@ public class ResultController : MonoBehaviour
     {
         // TODO: GameSession.Instance.LastResult 읽기 (null이면 테스트용 처리)
         // TODO: ShowResult → 개인 최고 기록 갱신 → 등록 흐름 시작 (포획 0건이면 생략)
+        ShowResult(GameSession.Instance.LastResult);
     }
 
     // TODO: 총점, 포획 그리드(어종별 마릿수), 청상아리 횟수, 스킬 아이콘 표시
     //       (RoundResult에 sharkCount, selectedSkillIds 필드 필요)
-    void ShowResult(RoundResult result) { }
+    void ShowResult(RoundResult result)
+    {
+        totalScoreText.text = $"{result.totalScore} 점";
+        foreach(var k in result.catches)
+        {
+            GameObject obj = Instantiate(catchCellPrefab,catchGridRoot);
+            obj.GetComponent<ScoreUnitPrefab>().InitPrefab(k.fishId,k.duringFever);
+        }
+    }
 
     // TODO: 총점 ≥ manseon_threshold 이면 만선
     bool IsManseon(int totalScore) => throw new System.NotImplementedException();

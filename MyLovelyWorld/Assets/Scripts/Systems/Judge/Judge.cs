@@ -30,7 +30,8 @@ public class JudgeModule
 
         result.currentPoint = ScoreKey(context.currentKey, (int)context.currentLevel);
         result.sizePoint = ScoreKey(context.sizeKey,(int)context.sizeClass);
-
+        Debug.Log($"물살: {context.currentLevel} 사이즈: {context.sizeClass}");
+        Debug.Log($"물살: {result.currentPoint} 사이즈: {result.sizePoint}");
         return result;
     }
 

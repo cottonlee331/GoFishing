@@ -266,4 +266,4 @@ MonoBehaviour:
   fishTable: {fileID: 11400000, guid: d5c695d6195f00c4eaa18fdf37e7d96c, type: 2}
   sizeTable: {fileID: 11400000, guid: a58a60e4d3d7ba9448b767e3a556ec32, type: 2}
   textobj: {fileID: 8962529211143238986}
-  fishImage: {fileID: 0}
+  fishImage: {fileID: 4411196321336466938}

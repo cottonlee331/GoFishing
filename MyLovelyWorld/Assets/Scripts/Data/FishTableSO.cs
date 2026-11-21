@@ -9,6 +9,7 @@ public class FishTableSO : ScriptableObject
     public class Row
     {
         public int id;
+        public Sprite icon;
         public SizeClass size;
         public string displayName;
         public int basePoints;

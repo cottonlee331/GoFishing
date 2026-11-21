@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: Assembly-CSharp::GameConfigSO
   roundTimeSec: 150
-  judgeTimeSec: 4
+  judgeTimeSec: 2.5
   confirmLockSec: 0.3
   p0: 0.3
   p2: 0.9
@@ -21,11 +21,9 @@ MonoBehaviour:
   partialScore: 0.5
   shadowNoise: 0.15
   resultTimeSec: 1
-  currentPeriodSec: 30
-  currentWarnSec: 0.5
+  currentPeriodSec: 10
   gaugeMax: 100
   feverDurationSec: 20
   feverMult: 1.5
   feverWaitMult: 0.6
-  sharkPoints: 250
   manseonThreshold: 600

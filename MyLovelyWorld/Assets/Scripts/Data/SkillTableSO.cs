@@ -10,7 +10,7 @@ public class SkillTableSO : ScriptableObject
     {
         public int id;
         public string displayName;
-        public string category;          // TODO: Enums.cs에 SkillCategory 추가 후 교체 (분류 기준: 기획서 본문 표 vs skills.csv 확인 필요)
+        //public string category;          // TODO: Enums.cs에 SkillCategory 추가 후 교체 (분류 기준: 기획서 본문 표 vs skills.csv 확인 필요)
         [TextArea] public string description;
         public Sprite icon;
         public string effectKey;         // 예: large_points_mult, wait_mult, judge_time_add_sec
@@ -22,5 +22,12 @@ public class SkillTableSO : ScriptableObject
     public Row[] rows;
 
     // TODO: id로 Row 찾기
-    public Row Get(int id) => throw new NotImplementedException();
+    public Row Get(int id){
+        foreach (var row in rows)
+        {
+            if (row.id == id)
+                return row;
+        }
+        throw new Exception($"SkillTableSO.Get({id}) not found");
+    }
 }

@@ -13,6 +13,7 @@ public class PlayHud : MonoBehaviour
     [SerializeField] ScoreSystem score;
     [SerializeField] FeverSystem fever;
     [SerializeField] FishingLoop loop;
+    [SerializeField] FishTableSO fishTable;
     [SerializeField] SkillTableSO skillTable;
     [SerializeField] GameConfigSO config;
 
@@ -33,18 +34,21 @@ public class PlayHud : MonoBehaviour
 
     [Header("Shark")]
     [SerializeField] Image[] sharkSlots = new Image[3];
+    [SerializeField] Image[] sharkCheck = new Image[3];
 
     [Header("Current")]
-    [SerializeField] GameObject currentObj;
+    [SerializeField] SpriteRenderer[] currentObj;
+    [SerializeField] Sprite[] currentSprite;
 
     [Header("Equipped skills")]
-    [SerializeField] Image[] skillIcons = new Image[3];
+    [SerializeField] SelectedDetailPrefab[] skillDetail;
 
     [Header("Ending")]
     [SerializeField] GameObject endingBanner;
 
     void OnEnable(){
         score.CatchScored += OnCatchScored;
+        score.SharkProgressCaught += OnSharkProgressCaught;
         fever.GaugeChanged += OnGaugeChanged;
         fever.FeverStarted += OnFeverStarted;
         fever.FeverEnded += OnFeverEnded;
@@ -57,6 +61,7 @@ public class PlayHud : MonoBehaviour
 
     void OnDisable(){
         score.CatchScored -= OnCatchScored;
+        score.SharkProgressCaught -= OnSharkProgressCaught;
         fever.GaugeChanged -= OnGaugeChanged;
         fever.FeverStarted -= OnFeverStarted;
         fever.FeverEnded -= OnFeverEnded;
@@ -72,6 +77,22 @@ public class PlayHud : MonoBehaviour
         scoreText.text = "0 점";
         feverGaugeFill.value = 0;
         bitePopup.SetActive(false);
+
+        for(int i = 0; i<skillDetail.Length; i++)
+        {
+            skillDetail[i].gameObject.SetActive(true);
+            if(i>=GameSession.Instance.SelectedSkillIds.Count) skillDetail[i].gameObject.SetActive(false);
+            else
+            {
+                skillDetail[i].SetSkillDetail(GameSession.Instance.SelectedSkillIds[i]);
+            }
+        }
+        sharkSlots[0].sprite = fishTable.Get(score.SharkGoal[0]).icon;
+        sharkSlots[1].sprite = fishTable.Get(score.SharkGoal[1]).icon;
+        sharkSlots[2].sprite = fishTable.Get(score.SharkGoal[2]).icon;
+        sharkCheck[0].gameObject.SetActive(false);
+        sharkCheck[1].gameObject.SetActive(false);
+        sharkCheck[2].gameObject.SetActive(false);
     }
 
     void Update(){
@@ -83,6 +104,10 @@ public class PlayHud : MonoBehaviour
         scoreText.text = totalScore.ToString()+" 점";
         GameObject obj = Instantiate(catchLogItemPrefab,catchLogRoot);
         obj.GetComponent<ScoreUnitPrefab>().InitPrefab(record.fishId,record.duringFever);
+    }
+
+    void OnSharkProgressCaught(int slotNum){
+        sharkCheck[slotNum].gameObject.SetActive(true);
     }
 
     // TODO: 게이지 비율 표시
@@ -98,6 +123,7 @@ public class PlayHud : MonoBehaviour
 
     void OnBiteStarted(BiteInfo bite){
         bitePopup.SetActive(true);
+        bitePopup.GetComponent<BitePopupView>().OnBiteStarted(bite);
     }
 
     void OnCatchResolved(BiteInfo bite, JudgeResult judge)
@@ -106,7 +132,11 @@ public class PlayHud : MonoBehaviour
     }
     // TODO: 물살 단계 표시
     void OnCurrentChanged(CurrentLevel level) {
-        // TODO: 물살 오브젝트 Sprite 변경
+        Debug.Log($"CurrentChange:{level}");
+        for(int i = 0; i<currentObj.Length; i++)
+        {
+            currentObj[i].sprite = currentSprite[(int)level];
+        }
     }
 
     // TODO: 물살 변화 예고 깜빡임

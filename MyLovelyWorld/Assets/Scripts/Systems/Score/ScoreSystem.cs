@@ -41,6 +41,7 @@ public class ScoreSystem : MonoBehaviour
 
     public event Action<CatchRecord, int> CatchScored;   // 획득 점수 기록, 총점
     public event Action<CatchOutcome, SizeClass> CatchResult;   // 포획 성공 여부
+    public event Action<int> SharkProgressCaught; // 청상아리 조합 포획 성공
 
     void Awake()
     {
@@ -82,6 +83,7 @@ public class ScoreSystem : MonoBehaviour
         for(int i = 0; i < SharkGoal.Length; i++){
             if(bite.fishId == SharkGoal[i] && !SharkProgress[i]){
                 SharkProgress[i] = true;
+                SharkProgressCaught?.Invoke(i);
                 for(int j = 0; j < SharkProgress.Length; j++){
                     if(!SharkProgress[j]){
                         SharkReady = false;
@@ -101,9 +103,9 @@ public class ScoreSystem : MonoBehaviour
     void InitSharkGoal()
     {
         // 스킬에 의한 조합 변경은 추후 구현
-        SharkGoal[0] = fishTable.GetBySize(SizeClass.Large)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Large).Length)].id;
+        SharkGoal[0] = fishTable.GetBySize(SizeClass.Small)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Large).Length)].id;
         SharkGoal[1] = fishTable.GetBySize(SizeClass.Medium)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Medium).Length)].id;
-        SharkGoal[2] = fishTable.GetBySize(SizeClass.Small)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Small).Length)].id;
+        SharkGoal[2] = fishTable.GetBySize(SizeClass.Large)[UnityEngine.Random.Range(0, fishTable.GetBySize(SizeClass.Small).Length)].id;
         SharkProgress[0] = false;
         SharkProgress[1] = false;
         SharkProgress[2] = false;

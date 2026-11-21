@@ -8,4 +8,14 @@ public class SceneLoader : MonoBehaviour
         Debug.Log("Loading scene: " + sceneName);
         SceneManager.LoadScene(sceneName);
     }
+
+    public void Retry()
+    {
+        GameSession.Instance.ResetForRetry();
+    }
+
+    public void ToTitle()
+    {
+        GameSession.Instance.ResetAll();
+    }
 }

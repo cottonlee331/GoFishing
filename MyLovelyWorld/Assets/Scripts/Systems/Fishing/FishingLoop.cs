@@ -23,14 +23,12 @@ public class FishingLoop : MonoBehaviour
     public event Action<CurrentLevel> CurrentChanged;
 
     JudgeModule judge;
-    JudgeInputQueue judgeQueue;
     BiteGenerator generator;
     bool isShark = false;   // 다음 입질이 청상아리
 
     void Awake()
     {
         judge = new JudgeModule();
-        judgeQueue = new JudgeInputQueue();
         generator = new BiteGenerator(sizeTable, fishTable, config);
     }
 
@@ -56,9 +54,6 @@ public class FishingLoop : MonoBehaviour
             case FishingState.Biting:
                 // TODO: 낚기 입력 시 judge로 판정 / judge_time_sec 초과 시 TIMEOUT → Resolved
                 stateTimer -= dt;
-                if (stateTimer <= 0){
-                    Judge();
-                }
                 break;
             case FishingState.Resolved:
                 // TODO: 결과 표시 시간 후 → Casting
@@ -80,12 +75,10 @@ public class FishingLoop : MonoBehaviour
                 break;
             case FishingState.Biting:
                 stateTimer = config.judgeTimeSec;
-                judgeQueue.Open();
                 // 스킬에 의한 연장 가능성은 추후 구현
                 break;
             case FishingState.Resolved:
                 stateTimer = config.resultTimeSec;
-                judgeQueue.Close();
                 // 결과 저장 및 UI 추가 필요
                 break;
             default:
@@ -104,13 +97,12 @@ public class FishingLoop : MonoBehaviour
         isShark = false;
     }
 
-    void Judge(){
+    public void Judge(JudgeContext context){
         if(state != FishingState.Biting) return;
         Debug.Log("Judge Confirm");
-        JudgeContext context = default; 
-        (context.currentKey, context.sizeKey) = judgeQueue.Peek();
         context.currentLevel = CurrentWave;
         context.duringFever = feverSystem.IsFever;
+        context.sizeClass = CurrentBite.size;
         CatchResolved?.Invoke(CurrentBite, judge.Judge(context));
         ChangeState(FishingState.Resolved);
     }
@@ -141,15 +133,5 @@ public class FishingLoop : MonoBehaviour
 
     public (float,float) GetBiteTimer(){
         return (stateTimer,config.judgeTimeSec);
-    }
-
-    public void JudgeButton(JudgeKey key){
-        judgeQueue.Push(key);
-        Debug.Log("물살:"+judgeQueue.Peek().current+" 어종:"+judgeQueue.Peek().size);
-    }
-
-    public void ConfirmButton()
-    {
-        Judge();
     }
 }

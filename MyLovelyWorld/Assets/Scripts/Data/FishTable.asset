@@ -14,22 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FishTableSO
   rows:
   - id: 0
+    icon: {fileID: 21300000, guid: 9762621a493bbd449b14211dd888709f, type: 3}
     size: 3
     displayName: "\uCCAD\uC0C1\uC544\uB9AC"
     basePoints: 100
     weight: 0
   - id: 1
-    size: 0
+    icon: {fileID: 21300000, guid: 2b73c57f2b5879c438e9d85b775397c0, type: 3}
+    size: 2
     displayName: "\uC18C\uD615\uBB3C\uACE0\uAE30"
     basePoints: 10
     weight: 30
   - id: 2
+    icon: {fileID: 21300000, guid: 9de33e368bf0dbf49805fed6e0825dc3, type: 3}
     size: 1
     displayName: "\uC911\uD615\uBB3C\uACE0\uAE30"
     basePoints: 50
     weight: 30
   - id: 3
-    size: 2
+    icon: {fileID: 21300000, guid: 9762621a493bbd449b14211dd888709f, type: 3}
+    size: 0
     displayName: "\uB300\uD615\uBB3C\uACE0\uAE30"
     basePoints: 30
     weight: 30
