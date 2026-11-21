@@ -13,13 +13,14 @@ public class ScoreUnitPrefab : MonoBehaviour
     private void Reset(){
         textobj = GetComponentInChildren<TMP_Text>();
     }
-    public void InitPrefab(int fishId, bool isFever){
+    public void InitPrefab(int fishId, float mult, int add){
         var fish = fishTable.Get(fishId);
         Debug.Log(fish+" "+fish.displayName);
         SizeClass size = fish.size;
         fishImage.sprite = fish.icon;
         int score = sizeTable.Get(size).points+fish.basePoints;
-        textobj.text = $"{fish.displayName}\n{score}점";
-        if(isFever) textobj.text += $" X{config.feverMult}";
+        textobj.text = $"{fish.displayName}\n{score}";
+        if(mult!=1) textobj.text += $" X{mult}";
+        if(add!=0) textobj.text += $" +{add}";
     }
 }

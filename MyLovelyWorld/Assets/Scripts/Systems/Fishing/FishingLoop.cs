@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // S3 + S2 연결. Casting → Waiting → Biting → Resolved 루프를 돌리는 상태 머신.
@@ -25,11 +27,17 @@ public class FishingLoop : MonoBehaviour
     JudgeModule judge;
     BiteGenerator generator;
     bool isShark = false;   // 다음 입질이 청상아리
+    float judgeTime;
+    float biteWaitMult;
+    float ignoreProb;
 
     void Awake()
     {
         judge = new JudgeModule();
-        generator = new BiteGenerator(sizeTable, fishTable, config);
+        judgeTime = config.judgeTimeSec;
+        biteWaitMult = 1;
+        ignoreProb = 0;
+        generator = new BiteGenerator(sizeTable, fishTable);
     }
 
     void Update()
@@ -52,7 +60,6 @@ public class FishingLoop : MonoBehaviour
                 }
                 break;
             case FishingState.Biting:
-                // TODO: 낚기 입력 시 judge로 판정 / judge_time_sec 초과 시 TIMEOUT → Resolved
                 stateTimer -= dt;
                 break;
             case FishingState.Resolved:
@@ -74,12 +81,8 @@ public class FishingLoop : MonoBehaviour
                 stateTimer = CurrentBite.waitTime;
                 break;
             case FishingState.Biting:
-                stateTimer = config.judgeTimeSec;
+                stateTimer = judgeTime;
                 // 스킬에 의한 연장 가능성은 추후 구현
-                break;
-            case FishingState.Resolved:
-                stateTimer = config.resultTimeSec;
-                // 결과 저장 및 UI 추가 필요
                 break;
             default:
                 stateTimer = 0;
@@ -90,26 +93,22 @@ public class FishingLoop : MonoBehaviour
     }
 
     void SetBite(){
-        float waitMultiplier = 1f;
-        if(feverSystem.IsFever) waitMultiplier *= config.feverWaitMult;
-        // TODO: 스킬로 인한 waitMultiplier 보정은 추후 구현
-        CurrentBite = generator.Generate(waitMultiplier,isShark);
+        if(feverSystem.IsFever) biteWaitMult *= config.feverWaitMult;
+        CurrentBite = generator.Generate(biteWaitMult,isShark);
         isShark = false;
     }
 
     public void Judge(JudgeContext context){
         if(state != FishingState.Biting) return;
-        Debug.Log("Judge Confirm");
         context.currentLevel = CurrentWave;
         context.duringFever = feverSystem.IsFever;
         context.sizeClass = CurrentBite.size;
-        CatchResolved?.Invoke(CurrentBite, judge.Judge(context));
+        CatchResolved?.Invoke(CurrentBite, judge.Judge(context,ignoreProb));
         ChangeState(FishingState.Resolved);
     }
 
     // TODO: 라운드 종료 시 호출. 진행 중 입질을 점수 없이 취소하고 루프 정지 (S1)
-    public void CancelAndStop()
-    {
+    public void CancelAndStop(){
         if(state == FishingState.Biting){
             CatchResolved?.Invoke(CurrentBite, new JudgeResult());
         }
@@ -117,10 +116,18 @@ public class FishingLoop : MonoBehaviour
     }
 
     // TODO: 라운드 시작 시 호출. 루프 시작
-    public void Begin()
-    {
+    public void InitSkillEffect(Dictionary<EffectKey,float> skillEffects){
+        if(skillEffects.ContainsKey(EffectKey.JudgeTimeAddSec)) judgeTime += skillEffects[EffectKey.JudgeTimeAddSec];
+        if(skillEffects.ContainsKey(EffectKey.BiteWaitMult)) biteWaitMult = skillEffects[EffectKey.BiteWaitMult];
+        if(skillEffects.ContainsKey(EffectKey.IgnoreWrongKey)) ignoreProb = skillEffects[EffectKey.IgnoreWrongKey];
+        if(skillEffects.ContainsKey(EffectKey.LShareMult)) generator.SetSizeShareMult(SizeClass.Large,skillEffects[EffectKey.LShareMult]);
+        if(skillEffects.ContainsKey(EffectKey.MShareMult)) generator.SetSizeShareMult(SizeClass.Medium,skillEffects[EffectKey.MShareMult]);
+        if(skillEffects.ContainsKey(EffectKey.SShareMult)) generator.SetSizeShareMult(SizeClass.Small,skillEffects[EffectKey.SShareMult]);
+        if(skillEffects.ContainsKey(EffectKey.MLShareMult)) generator.SetSizeShareMult(SizeClass.Medium,SizeClass.Large,skillEffects[EffectKey.MLShareMult]);
+
+    }
+    public void Begin(){
         ChangeState(FishingState.Casting);
-        CurrentWave = CurrentLevel.Normal;
         OnWaveChange();
     }
     public void OnWaveChange(){
@@ -132,6 +139,6 @@ public class FishingLoop : MonoBehaviour
     }
 
     public (float,float) GetBiteTimer(){
-        return (stateTimer,config.judgeTimeSec);
+        return (stateTimer,judgeTime);
     }
 }

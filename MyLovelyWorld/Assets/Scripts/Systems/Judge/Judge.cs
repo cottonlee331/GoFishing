@@ -17,19 +17,25 @@ public struct JudgeResult
     public float currentPoint;
     public float sizePoint;
     public bool duringFever;          // 피버 상태 여부
+    public bool isLuckey;
 }
 
 
 // S2. 판정 모듈
 public class JudgeModule
 {
-    public JudgeResult Judge(in JudgeContext context)
+    public JudgeResult Judge(in JudgeContext context, float ignoreProb)
     {
         JudgeResult result = default;
         result.duringFever = context.duringFever;
 
         result.currentPoint = ScoreKey(context.currentKey, (int)context.currentLevel);
         result.sizePoint = ScoreKey(context.sizeKey,(int)context.sizeClass);
+        if(result.currentPoint*result.sizePoint<1 && UnityEngine.Random.Range(0,100)<ignoreProb*100){
+            result.isLuckey = true;
+            result.currentPoint = ScoreKey(JudgeKey.Delicate,(int)SizeClass.Small);
+            result.sizePoint = ScoreKey(JudgeKey.Delicate,(int)SizeClass.Small);
+        }
         Debug.Log($"물살: {context.currentLevel} 사이즈: {context.sizeClass}");
         Debug.Log($"물살: {result.currentPoint} 사이즈: {result.sizePoint}");
         return result;

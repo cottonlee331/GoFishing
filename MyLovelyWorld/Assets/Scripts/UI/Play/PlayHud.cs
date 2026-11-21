@@ -1,6 +1,5 @@
+using System.Threading.Tasks;
 using TMPro;
-using Unity.Burst.CompilerServices;
-using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,6 +26,8 @@ public class PlayHud : MonoBehaviour
 
     [Header("Bite Popup")]
     [SerializeField] GameObject bitePopup;
+    [SerializeField] GameObject resultPopup;
+    [SerializeField] Sprite[] resultSprite = new Sprite[3]; // 0은 성공, 1은 실패, 2는 스킬성공
 
     [Header("Catch log")]
     [SerializeField] Transform catchLogRoot;
@@ -46,8 +47,11 @@ public class PlayHud : MonoBehaviour
     [Header("Ending")]
     [SerializeField] GameObject endingBanner;
 
+    private float resultTimer=0;
+
     void OnEnable(){
         score.CatchScored += OnCatchScored;
+        score.CatchResult += OnCatchResult;
         score.SharkProgressCaught += OnSharkProgressCaught;
         fever.GaugeChanged += OnGaugeChanged;
         fever.FeverStarted += OnFeverStarted;
@@ -87,23 +91,32 @@ public class PlayHud : MonoBehaviour
                 skillDetail[i].SetSkillDetail(GameSession.Instance.SelectedSkillIds[i]);
             }
         }
-        sharkSlots[0].sprite = fishTable.Get(score.SharkGoal[0]).icon;
-        sharkSlots[1].sprite = fishTable.Get(score.SharkGoal[1]).icon;
-        sharkSlots[2].sprite = fishTable.Get(score.SharkGoal[2]).icon;
-        sharkCheck[0].gameObject.SetActive(false);
-        sharkCheck[1].gameObject.SetActive(false);
-        sharkCheck[2].gameObject.SetActive(false);
     }
 
     void Update(){
         timerText.text = FormatTime(round.GetRoundTime());
+        if(resultTimer>0){
+            resultTimer-=Time.unscaledDeltaTime;
+            if(resultTimer<=0){
+                resultPopup.SetActive(false);
+            }
+        }
     }
 
     // TODO: 점수 갱신, 포획 목록 항목 추가, 청상아리 칸 갱신
     void OnCatchScored(CatchRecord record, int totalScore) {
         scoreText.text = totalScore.ToString()+" 점";
         GameObject obj = Instantiate(catchLogItemPrefab,catchLogRoot);
-        obj.GetComponent<ScoreUnitPrefab>().InitPrefab(record.fishId,record.duringFever);
+        obj.GetComponent<ScoreUnitPrefab>().InitPrefab(record.fishId,record.mult,record.add);
+    }
+
+    void OnCatchResult(CatchOutcome outcome, SizeClass size){
+        int result = 1;
+        if(outcome == CatchOutcome.Success) result = 0;
+        else if(outcome == CatchOutcome.Lucky) result = 2;
+        resultTimer = config.resultTimeSec;
+        resultPopup.SetActive(true);
+        resultPopup.GetComponent<Image>().sprite = resultSprite[result];
     }
 
     void OnSharkProgressCaught(int slotNum){
@@ -128,6 +141,7 @@ public class PlayHud : MonoBehaviour
 
     void OnCatchResolved(BiteInfo bite, JudgeResult judge)
     {
+        if(loop.State==FishingState.Terminated)return;
         bitePopup.SetActive(false);
     }
     // TODO: 물살 단계 표시
@@ -142,7 +156,14 @@ public class PlayHud : MonoBehaviour
     // TODO: 물살 변화 예고 깜빡임
     void OnCurrentWarning(float remaining) { }
 
-    void OnRoundStarted() {
+    void OnRoundStarted()
+    {
+        sharkSlots[0].sprite = fishTable.Get(score.SharkGoal[0]).icon;
+        sharkSlots[1].sprite = fishTable.Get(score.SharkGoal[1]).icon;
+        sharkSlots[2].sprite = fishTable.Get(score.SharkGoal[2]).icon;
+        sharkCheck[0].gameObject.SetActive(false);
+        sharkCheck[1].gameObject.SetActive(false);
+        sharkCheck[2].gameObject.SetActive(false);
     }
     // TODO: "오늘 고기잡이 종료!" 표시
     void OnRoundEnded(RoundResult result) { }

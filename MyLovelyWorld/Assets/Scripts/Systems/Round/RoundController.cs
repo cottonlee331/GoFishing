@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // S1. timeScale과 무관한 라운드 카운트다운.
 public class RoundTimer
@@ -12,7 +14,7 @@ public class RoundTimer
 
     float WaveSeconds;
 
-    public void Start(float seconds, float waveSeconds){
+    public void Init(float seconds, float waveSeconds){
         Remaining = seconds;
         WaveRemaining = waveSeconds;
         WaveSeconds = waveSeconds;
@@ -38,6 +40,7 @@ public class RoundTimer
 public class RoundController : MonoBehaviour
 {
     [SerializeField] GameConfigSO config;
+    [SerializeField] SkillTableSO skillTable;
     [SerializeField] FishingLoop fishingLoop;
     [SerializeField] FeverSystem feverSystem;
     [SerializeField] ScoreSystem scoreSystem;
@@ -50,9 +53,12 @@ public class RoundController : MonoBehaviour
 
     public RoundTimer timer{get; private set;}
 
+    private Dictionary<EffectKey,float> skillEffects;
+    private float waveMult = 1;
+
+
     void OnEnable()
     {
-        RoundStarted += StartRound;
         timer = new RoundTimer();
         timer.Expired += EndRound;
         timer.Wave += fishingLoop.OnWaveChange;
@@ -60,7 +66,7 @@ public class RoundController : MonoBehaviour
     }
     void Start()
     {
-        RoundStarted?.Invoke();
+        StartRound();
     }
 
     void Update(){
@@ -68,8 +74,14 @@ public class RoundController : MonoBehaviour
     }
 
     void StartRound(){
-        timer.Start(config.roundTimeSec, config.currentPeriodSec);
+        SetSkillEffects();
+        if(skillEffects.ContainsKey(EffectKey.CurrentPeriodMult)) waveMult = skillEffects[EffectKey.CurrentPeriodMult];
+        timer.Init(config.roundTimeSec, config.currentPeriodSec*waveMult);
+        scoreSystem.InitSkillEffect(skillEffects);
+        fishingLoop.InitSkillEffect(skillEffects);
+        if(skillEffects.ContainsKey(EffectKey.FeverGaugeMult))feverSystem.InitSkillEffect(skillEffects[EffectKey.FeverGaugeMult]);
         fishingLoop.Begin();
+        RoundStarted?.Invoke();
     }
 
     // TODO: 진행 중 입질 취소 → Ending 연출 → Result 씬으로
@@ -80,6 +92,20 @@ public class RoundController : MonoBehaviour
         RoundResult result = scoreSystem.BuildResult();
         GameSession.Instance.SetLastResult(result);
         RoundEnded?.Invoke(result);
+    }
+
+    void SetSkillEffects(){
+        skillEffects = new Dictionary<EffectKey, float>();
+        foreach(int id in GameSession.Instance.SelectedSkillIds){
+            var skill = skillTable.Get(id);
+            AddSkillEffect(skill.effectKey,skill.effectValue);
+            AddSkillEffect(skill.costKey,skill.costValue);
+        }
+    }
+
+    void AddSkillEffect(EffectKey key, float val){
+        if(skillEffects.ContainsKey(key)) skillEffects[key] += val;
+        else skillEffects.Add(key,val);
     }
 
     public float GetRoundTime(){

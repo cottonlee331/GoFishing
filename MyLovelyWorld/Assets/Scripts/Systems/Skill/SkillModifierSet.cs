@@ -5,9 +5,7 @@ using System.Collections.Generic;
 // 같은 키를 바꾸는 효과는 곱셈(_mult), 더하는 타입은 덧셈(_add, _pp, _sec, _bonus)으로 겹친다.
 public class SkillModifierSet
 {
-    readonly HashSet<int> skillIds = new();
-    readonly Dictionary<string, float> multipliers = new();
-    readonly Dictionary<string, float> additions = new();
+    readonly Dictionary<EffectKey, float> skillEffects = new();
 
     // TODO: 선택 스킬 id 목록과 테이블로 집계 (effect, cost 둘 다 반영)
     public SkillModifierSet(SkillTableSO table, IReadOnlyList<int> selectedSkillIds) { }

@@ -39,7 +39,7 @@ public class ResultController : MonoBehaviour
         foreach(var k in result.catches)
         {
             GameObject obj = Instantiate(catchCellPrefab,catchGridRoot);
-            obj.GetComponent<ScoreUnitPrefab>().InitPrefab(k.fishId,k.duringFever);
+            obj.GetComponent<ScoreUnitPrefab>().InitPrefab(k.fishId,k.mult,k.add);
         }
     }
 

@@ -34,6 +34,7 @@ public class GameSession : MonoBehaviour
         selectedSkillIds.Clear();
         foreach(int k in skillIds) selectedSkillIds.Add(k);
         selectedSkillIds.Sort();
+        
     }
 
     // TODO: 라운드 종료 시 결과 저장

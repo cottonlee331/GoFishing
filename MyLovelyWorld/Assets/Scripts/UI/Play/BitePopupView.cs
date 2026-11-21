@@ -22,9 +22,6 @@ public class BitePopupView : MonoBehaviour
     [Header("Judge time")]
     [SerializeField] Slider judgeTimeFill;
 
-    [Header("Result")]
-    [SerializeField] TMP_Text resultText;
-
     float time;
     float judgetime;
     public JudgeInputQueue judgeQueue{get; private set;}
@@ -42,7 +39,7 @@ public class BitePopupView : MonoBehaviour
     void OnDisable()
     {
         // TODO: 구독 해제
-        loop.BiteStarted -= OnBiteStarted;
+        //loop.BiteStarted -= OnBiteStarted;
         judgeQueue.Changed -= OnQueueChanged;
         judgeQueue.Close();
     }
@@ -76,9 +73,6 @@ public class BitePopupView : MonoBehaviour
         if(sizeKey!=null) queueSlots[1].sprite = queueSprite[(int)sizeKey+1];
         else queueSlots[1].sprite = queueSprite[0];
     }
-
-    // TODO: 성공/실패/TIMEOUT 표시. Cancelled면 바로 숨김
-    void OnCatchResolved(BiteInfo bite, JudgeResult result) { }
 
     public void QueueButton(int key) {
         judgeQueue.Push((JudgeKey)key);

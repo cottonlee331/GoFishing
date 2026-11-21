@@ -15,12 +15,14 @@ public class FeverSystem : MonoBehaviour
     public event Action FeverEnded;
     public event Action<float> GaugeChanged;
 
+    float feverGaugeMult = 1;
+
     public void OnCatchResult(CatchOutcome outcome, SizeClass size)
     {
         if (IsFever) return;
         if (outcome != CatchOutcome.Success) return;
 
-        Gauge += sizeTable.Get(size).gaugeGain;
+        Gauge += sizeTable.Get(size).gaugeGain*feverGaugeMult;
         GaugeChanged?.Invoke(Gauge);
         if (Gauge >= config.gaugeMax){
             Gauge = config.gaugeMax;
@@ -49,5 +51,9 @@ public class FeverSystem : MonoBehaviour
         IsFever = false;
         Gauge = 0f;
         FeverEnded?.Invoke();
+    }
+
+    public void InitSkillEffect(float feverMult){
+        feverGaugeMult = feverMult;
     }
 }

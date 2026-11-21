@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 // 한 번의 입질 정보. 캐스팅 시점에 BiteGenerator가 만든다.
@@ -15,20 +16,26 @@ public class BiteGenerator
 {
     readonly SizeTableSO sizeTable;
     readonly FishTableSO fishTable;
-    readonly GameConfigSO config;
     readonly Random rng;
 
-    public BiteGenerator(SizeTableSO sizeTable, FishTableSO fishTable, GameConfigSO config, int? seed = null)
+    private int[] sizeShare;
+
+
+    public BiteGenerator(SizeTableSO sizeTable, FishTableSO fishTable, int? seed = null)
     {
         this.sizeTable = sizeTable;
         this.fishTable = fishTable;
-        this.config = config;
+        sizeShare = new int[sizeTable.rows.Length];
+        for(int i = 0; i<sizeTable.rows.Length; i++){
+            sizeShare[i] = sizeTable.Get((SizeClass)i).share;
+        }
         rng = seed.HasValue ? new Random(seed.Value) : new Random();
     }
 
     // TODO: 아래 단계를 순서대로 호출해 BiteInfo 하나를 만든다.
     public BiteInfo Generate() => Generate(1f,false);
-    public BiteInfo Generate(float waitMultiplier,bool isShark){
+    public BiteInfo Generate(float waitMultiplier, bool isShark){
+                UnityEngine.Debug.Log($"ShareInfo: {sizeShare[0]}/{sizeShare[1]}/{sizeShare[2]}");
         BiteInfo biteInfo = default;
         if(isShark){
             biteInfo.size = SizeClass.Shark;
@@ -84,6 +91,29 @@ public class BiteGenerator
         return waitTime * waitMultiplier;
     }
 
-    // TODO: shadow_ratio × (1 ± shadow_noise)
-    //float CalcShadowScale(SizeClass size) => throw new NotImplementedException();
+    public void SetSizeShareMult(SizeClass size, float mult){
+        int id = (int)size;
+        int tmp = sizeShare[id];
+        sizeShare[id] = (int)(sizeShare[id]*mult);
+        tmp = (sizeShare[id]-tmp)/(sizeShare.Length-2); // 출현률이 바뀌는 사이즈, 상어 제외
+        for(int i = 0; i<sizeShare.Length; i++){
+            if((SizeClass)i == SizeClass.Shark || i==id) continue;
+            sizeShare[i]-=tmp;
+            if(sizeShare[i]<=0)sizeShare[i] = 1;
+        }
+
+    }
+    public void SetSizeShareMult(SizeClass size1, SizeClass size2, float mult){
+        int id1 = (int)size1;
+        int id2 = (int)size2;
+        int tmp = sizeShare[id1]+sizeShare[id2];
+        sizeShare[id1] = (int)(sizeShare[id1]*mult);
+        sizeShare[id2] = (int)(sizeShare[id2]*mult);
+        tmp = (sizeShare[id1]+sizeShare[id2]-tmp)/(sizeShare.Length-3);
+        for(int i = 0; i<sizeShare.Length; i++){
+            if((SizeClass)i == SizeClass.Shark || i==id1 || i==id2) continue;
+            sizeShare[i]-=tmp;
+            if(sizeShare[i]<=0)sizeShare[i] = 1;
+        }
+    }
 }
