@@ -558,6 +558,51 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &164003610
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 164003611}
+  - component: {fileID: 164003612}
+  m_Layer: 0
+  m_Name: InputRouter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &164003611
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164003610}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 460581499}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &164003612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164003610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 020ce7644a4073e4091bced02fc799af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputRouter
+  loop: {fileID: 746798267}
 --- !u!1 &187611299
 GameObject:
   m_ObjectHideFlags: 0
@@ -1588,6 +1633,7 @@ Transform:
   - {fileID: 746798266}
   - {fileID: 53686405}
   - {fileID: 231981305}
+  - {fileID: 164003611}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &508459803
@@ -2795,9 +2841,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1322163308}
-        m_TargetAssemblyTypeName: BitePopupView, Assembly-CSharp
-        m_MethodName: ConfirmButton
+      - m_Target: {fileID: 164003612}
+        m_TargetAssemblyTypeName: InputRouter, Assembly-CSharp
+        m_MethodName: PressConfirm
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2892,7 +2938,6 @@ MonoBehaviour:
   config: {fileID: 11400000, guid: b351440eb454ca14c86f383cdb63fe3e, type: 2}
   sizeTable: {fileID: 11400000, guid: a58a60e4d3d7ba9448b767e3a556ec32, type: 2}
   fishTable: {fileID: 11400000, guid: d5c695d6195f00c4eaa18fdf37e7d96c, type: 2}
-  feverSystem: {fileID: 53686406}
   state: 0
   stateTimer: 0
 --- !u!1 &793842395
@@ -4762,8 +4807,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1322163308}
-        m_TargetAssemblyTypeName: BitePopupView, Assembly-CSharp
+      - m_Target: {fileID: 164003612}
+        m_TargetAssemblyTypeName: InputRouter, Assembly-CSharp
         m_MethodName: QueueButton
         m_Mode: 3
         m_Arguments:
@@ -4895,8 +4940,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1322163308}
-        m_TargetAssemblyTypeName: BitePopupView, Assembly-CSharp
+      - m_Target: {fileID: 164003612}
+        m_TargetAssemblyTypeName: InputRouter, Assembly-CSharp
         m_MethodName: QueueButton
         m_Mode: 3
         m_Arguments:
@@ -7678,8 +7723,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1322163308}
-        m_TargetAssemblyTypeName: BitePopupView, Assembly-CSharp
+      - m_Target: {fileID: 164003612}
+        m_TargetAssemblyTypeName: InputRouter, Assembly-CSharp
         m_MethodName: QueueButton
         m_Mode: 3
         m_Arguments:

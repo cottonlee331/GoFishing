@@ -63,12 +63,4 @@ public class BitePopupView : MonoBehaviour
         if(sizeKey!=null) queueSlots[1].sprite = queueSprite[(int)sizeKey+1];
         else queueSlots[1].sprite = queueSprite[0];
     }
-
-    public void QueueButton(int key) {
-        loop.judgeQueue.Push((JudgeKey)key);
-    }
-
-    public void ConfirmButton() {
-        loop.Judge();
-    }
 }
