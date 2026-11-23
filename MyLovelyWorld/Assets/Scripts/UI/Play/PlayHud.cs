@@ -147,6 +147,9 @@ public class PlayHud : MonoBehaviour
 
     void OnDrawFailResult()
     {
+        if(loop.State==FishingState.Terminated)return;
+        bitePopup.SetActive(false);
+        
         resultTimer = config.resultTimeSec;
         resultPopup.SetActive(true);
         resultPopup.GetComponent<Image>().sprite = resultSprite[1];

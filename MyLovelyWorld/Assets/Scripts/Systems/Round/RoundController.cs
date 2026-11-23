@@ -89,7 +89,10 @@ public class RoundController : MonoBehaviour
             CatchRecord record = scoreSystem.CalcScore(bite, result);
             feverSystem.AddFeverGuage(bite.size);
             sharkSystem.UpdateSharkProgress(bite.fishId);
-            if(sharkSystem.SharkReady) fishingLoop.SetNextBiteShark();
+            if(sharkSystem.SharkReady) {
+                fishingLoop.SetNextBiteShark();
+                sharkSystem.SetSharkDone();
+            }
             DrawCatchResult?.Invoke(result,record,scoreSystem.TotalScore);
         }
         else DrawFailResult?.Invoke();

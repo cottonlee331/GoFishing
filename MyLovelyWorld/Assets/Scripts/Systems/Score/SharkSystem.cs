@@ -47,6 +47,11 @@ public class SharkSystem : MonoBehaviour
         SharkReady = false;
     }
 
+    public void SetSharkDone()
+    {
+        SharkReady = false;
+    }
+
     public void InitSkillEffect(int value)
     {
         InitSharkGoal(value);

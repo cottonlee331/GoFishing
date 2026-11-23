@@ -34,7 +34,7 @@ public class ScoreSystem : MonoBehaviour
     public float feverMult {get; private set;}
 
     private float[] sizePointMult = {1,1,1,1};
-    private int currentBonus = 0;
+    private int waveBonus = 0;
     
 
     void Awake()
@@ -52,7 +52,7 @@ public class ScoreSystem : MonoBehaviour
         record.mult = sizePointMult[(int)bite.size];
         if(result.duringFever) record.mult *= feverMult;
         record.add = 0;
-        if(result.wavePoint == 1f && result.outcome!=CatchOutcome.Lucky) record.add = currentBonus;
+        if(result.wavePoint == 1f && result.outcome!=CatchOutcome.Lucky) record.add = waveBonus;
         
         // 점수 계산
         record.points = sizeTable.Get(bite.size).points+fishTable.Get(bite.fishId).basePoints;
@@ -60,6 +60,7 @@ public class ScoreSystem : MonoBehaviour
         if(result.duringFever){
             record.points = (int)(record.points*feverMult);
         }
+        record.points+=record.add;
         TotalScore += record.points;
 
         records.Add(record);
@@ -73,7 +74,7 @@ public class ScoreSystem : MonoBehaviour
         if(skillEffects.ContainsKey(EffectKey.MPointMult)) sizePointMult[1] = skillEffects[EffectKey.MPointMult];
         if(skillEffects.ContainsKey(EffectKey.SPointMult)) sizePointMult[2] = skillEffects[EffectKey.SPointMult];
 
-        if(skillEffects.ContainsKey(EffectKey.CurrentBonus)) currentBonus = (int)skillEffects[EffectKey.CurrentBonus];
+        if(skillEffects.ContainsKey(EffectKey.CurrentBonus)) waveBonus = (int)skillEffects[EffectKey.CurrentBonus];
     }
     public RoundResult BuildResult(){
         RoundResult result = new RoundResult();

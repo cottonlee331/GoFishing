@@ -8,7 +8,6 @@ public struct BiteInfo
     public SizeClass size;
     public int fishId;           // 플레이어에게는 포획 전까지 숨김
     public float waitTime;       // 입질까지 대기 시간(초)
-    //public float shadowScale;    // 그림자 크기 = shadow_ratio × (1 ± shadow_noise)
 }
 
 // S3. 입질 추첨 로직. MonoBehaviour가 아닌 일반 C# 클래스 (테스트 용이).
@@ -53,15 +52,15 @@ public class BiteGenerator
     // TODO: sizes.share 비율로 크기 추첨 (스킬 6 → 8 → 10 보정은 나중에)
     SizeClass DrawSize(){
         int total = 0;
-        foreach (var row in sizeTable.rows) total += row.share;
+        foreach (var share in sizeShare) total += share;
 
         int random = rng.Next(total);
-        foreach (var row in sizeTable.rows)
+        for (int i = 0; i<sizeShare.Length; i++)
         {
-            random -= row.share;
+            random -= sizeShare[i];
             if (random < 0)
             {
-                return row.size;
+                return (SizeClass)i;
             }
         }
 

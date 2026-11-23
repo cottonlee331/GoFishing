@@ -119,7 +119,9 @@ public class FishingLoop : MonoBehaviour
     // TODO: 라운드 종료 시 호출. 진행 중 입질을 점수 없이 취소하고 루프 정지 (S1)
     public void CancelAndStop(){
         if(state == FishingState.Biting){
-            CatchResolved?.Invoke(CurrentBite, new JudgeResult());
+            JudgeResult result = new JudgeResult();
+            result.outcome = CatchOutcome.Cancelled;
+            CatchResolved?.Invoke(CurrentBite, result);
         }
         ChangeState(FishingState.Terminated);
     }
@@ -128,7 +130,7 @@ public class FishingLoop : MonoBehaviour
     public void InitSkillEffect(Dictionary<EffectKey,float> skillEffects){
         if(skillEffects.ContainsKey(EffectKey.JudgeTimeAddSec)) judgeTime += skillEffects[EffectKey.JudgeTimeAddSec];
         if(skillEffects.ContainsKey(EffectKey.BiteWaitMult)) biteWaitMult = skillEffects[EffectKey.BiteWaitMult];
-        if(skillEffects.ContainsKey(EffectKey.IgnoreWrongKey)) ignoreProb = skillEffects[EffectKey.IgnoreWrongKey];
+        if(skillEffects.ContainsKey(EffectKey.IgnoreWrongKey)) judgeModule = new JudgeModule(config,skillEffects[EffectKey.IgnoreWrongKey]);
         if(skillEffects.ContainsKey(EffectKey.LShareMult)) generator.SetSizeShareMult(SizeClass.Large,skillEffects[EffectKey.LShareMult]);
         if(skillEffects.ContainsKey(EffectKey.MShareMult)) generator.SetSizeShareMult(SizeClass.Medium,skillEffects[EffectKey.MShareMult]);
         if(skillEffects.ContainsKey(EffectKey.SShareMult)) generator.SetSizeShareMult(SizeClass.Small,skillEffects[EffectKey.SShareMult]);

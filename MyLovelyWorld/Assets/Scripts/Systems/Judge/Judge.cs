@@ -36,7 +36,7 @@ public class JudgeModule
 
         result.wavePoint = ScoreKey(context.waveKey, (int)context.waveLevel);
         result.sizePoint = ScoreKey(context.sizeKey,(int)context.sizeClass);
-        if(result.wavePoint*result.sizePoint<1 && UnityEngine.Random.Range(0,100)<ignoreProb*100) result.outcome = CatchOutcome.Lucky;
+        if(result.wavePoint*result.sizePoint<1 && Random.Range(0,100)<ignoreProb*100) result.outcome = CatchOutcome.Lucky;
         else result.outcome = RollBiteResult(result.wavePoint,result.sizePoint);
         Debug.Log($"물살: {context.waveLevel} 사이즈: {context.sizeClass}");
         Debug.Log($"물살: {result.wavePoint} 사이즈: {result.sizePoint}");
