@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 // S1. timeScale과 무관한 라운드 카운트다운.
 public class RoundTimer
@@ -27,7 +26,6 @@ public class RoundTimer
         WaveRemaining -= unscaledDt;
         if (Remaining <= 0f){
             Remaining = 0f;
-            Expired?.Invoke();
         }
         if(WaveRemaining <= 0f){
             Wave?.Invoke();
@@ -44,12 +42,17 @@ public class RoundController : MonoBehaviour
     [SerializeField] FishingLoop fishingLoop;
     [SerializeField] FeverSystem feverSystem;
     [SerializeField] ScoreSystem scoreSystem;
+    [SerializeField] SharkSystem sharkSystem;
 
     [Header("Debug (read only)")]
     [SerializeField] RoundState state;
 
     public event Action RoundStarted;
     public event Action<RoundResult> RoundEnded;
+
+    // Result UI Event
+    public event Action<JudgeResult,CatchRecord,int> DrawCatchResult;
+    public event Action DrawFailResult;
 
     public RoundTimer timer{get; private set;}
 
@@ -60,9 +63,8 @@ public class RoundController : MonoBehaviour
     void OnEnable()
     {
         timer = new RoundTimer();
-        timer.Expired += EndRound;
         timer.Wave += fishingLoop.OnWaveChange;
-        feverSystem.FeverEnded += EndRound;
+        fishingLoop.CatchResolved += OnCatchResolved;
     }
     void Start()
     {
@@ -71,8 +73,28 @@ public class RoundController : MonoBehaviour
 
     void Update(){
         timer.Tick(Time.unscaledDeltaTime);
+        if (feverSystem.IsFever)
+        {
+            feverSystem.Tick(Time.unscaledDeltaTime);
+            if(!feverSystem.IsFever) {
+                if(timer.IsExpired) EndRound();
+            }
+        }
+        else if(timer.IsExpired) EndRound();
     }
-
+    
+    void OnCatchResolved(BiteInfo bite, JudgeResult result){
+        if(result.outcome == CatchOutcome.Success || result.outcome == CatchOutcome.Lucky){
+            result.duringFever = feverSystem.IsFever;
+            CatchRecord record = scoreSystem.CalcScore(bite, result);
+            feverSystem.AddFeverGuage(bite.size);
+            sharkSystem.UpdateSharkProgress(bite.fishId);
+            if(sharkSystem.SharkReady) fishingLoop.SetNextBiteShark();
+            DrawCatchResult?.Invoke(result,record,scoreSystem.TotalScore);
+        }
+        else DrawFailResult?.Invoke();
+        fishingLoop.SetFever(feverSystem.IsFever);
+    }
     void StartRound(){
         SetSkillEffects();
         if(skillEffects.ContainsKey(EffectKey.CurrentPeriodMult)) waveMult = skillEffects[EffectKey.CurrentPeriodMult];
@@ -80,6 +102,7 @@ public class RoundController : MonoBehaviour
         scoreSystem.InitSkillEffect(skillEffects);
         fishingLoop.InitSkillEffect(skillEffects);
         if(skillEffects.ContainsKey(EffectKey.FeverGaugeMult))feverSystem.InitSkillEffect(skillEffects[EffectKey.FeverGaugeMult]);
+        if(skillEffects.ContainsKey(EffectKey.SharkComboChange)) sharkSystem.InitSkillEffect((int)skillEffects[EffectKey.SharkComboChange]);
         fishingLoop.Begin();
         RoundStarted?.Invoke();
     }

@@ -12,6 +12,8 @@ public class PlayHud : MonoBehaviour
     [SerializeField] ScoreSystem score;
     [SerializeField] FeverSystem fever;
     [SerializeField] FishingLoop loop;
+    [SerializeField] SharkSystem shark;
+
     [SerializeField] FishTableSO fishTable;
     [SerializeField] SkillTableSO skillTable;
     [SerializeField] GameConfigSO config;
@@ -50,26 +52,27 @@ public class PlayHud : MonoBehaviour
     private float resultTimer=0;
 
     void OnEnable(){
-        score.CatchScored += OnCatchScored;
-        score.CatchResult += OnCatchResult;
-        score.SharkProgressCaught += OnSharkProgressCaught;
+        shark.SharkProgressCaught += OnSharkProgressCaught;
         fever.GaugeChanged += OnGaugeChanged;
         fever.FeverStarted += OnFeverStarted;
         fever.FeverEnded += OnFeverEnded;
-        loop.CurrentChanged += OnCurrentChanged;
+        loop.WaveChanged += OnWaveChanged;
         loop.BiteStarted+= OnBiteStarted;
-        loop.CatchResolved += OnCatchResolved;
         round.RoundStarted += OnRoundStarted;
+        round.DrawCatchResult += OnDrawCatchResult;
+        round.DrawFailResult += OnDrawFailResult;
         round.RoundEnded += OnRoundEnded;
     }
 
     void OnDisable(){
-        score.CatchScored -= OnCatchScored;
-        score.SharkProgressCaught -= OnSharkProgressCaught;
+        shark.SharkProgressCaught -= OnSharkProgressCaught;
         fever.GaugeChanged -= OnGaugeChanged;
         fever.FeverStarted -= OnFeverStarted;
         fever.FeverEnded -= OnFeverEnded;
-        loop.CurrentChanged -= OnCurrentChanged;
+        loop.WaveChanged -= OnWaveChanged;
+        round.RoundStarted -= OnRoundStarted;
+        round.DrawCatchResult -= OnDrawCatchResult;
+        round.DrawFailResult -= OnDrawFailResult;
         round.RoundEnded -= OnRoundEnded;
     }
 
@@ -103,22 +106,6 @@ public class PlayHud : MonoBehaviour
         }
     }
 
-    // TODO: 점수 갱신, 포획 목록 항목 추가, 청상아리 칸 갱신
-    void OnCatchScored(CatchRecord record, int totalScore) {
-        scoreText.text = totalScore.ToString()+" 점";
-        GameObject obj = Instantiate(catchLogItemPrefab,catchLogRoot);
-        obj.GetComponent<ScoreUnitPrefab>().InitPrefab(record.fishId,record.mult,record.add);
-    }
-
-    void OnCatchResult(CatchOutcome outcome, SizeClass size){
-        int result = 1;
-        if(outcome == CatchOutcome.Success) result = 0;
-        else if(outcome == CatchOutcome.Lucky) result = 2;
-        resultTimer = config.resultTimeSec;
-        resultPopup.SetActive(true);
-        resultPopup.GetComponent<Image>().sprite = resultSprite[result];
-    }
-
     void OnSharkProgressCaught(int slotNum){
         sharkCheck[slotNum].gameObject.SetActive(true);
     }
@@ -139,13 +126,34 @@ public class PlayHud : MonoBehaviour
         bitePopup.GetComponent<BitePopupView>().OnBiteStarted(bite);
     }
 
-    void OnCatchResolved(BiteInfo bite, JudgeResult judge)
+    void OnDrawCatchResult(JudgeResult result, CatchRecord record, int totalScore)
     {
         if(loop.State==FishingState.Terminated)return;
         bitePopup.SetActive(false);
+
+        // 결과 UI 갱신
+        int spriteId = 1;
+        if(result.outcome == CatchOutcome.Success) spriteId = 0;
+        else if(result.outcome == CatchOutcome.Lucky) spriteId = 2;
+        resultTimer = config.resultTimeSec;
+        resultPopup.SetActive(true);
+        resultPopup.GetComponent<Image>().sprite = resultSprite[spriteId];
+
+        // 점수 UI 갱신
+        scoreText.text = totalScore.ToString()+" 점";
+        GameObject obj = Instantiate(catchLogItemPrefab,catchLogRoot);
+        obj.GetComponent<ScoreUnitPrefab>().InitPrefab(record.fishId,record.mult,record.add);
     }
+
+    void OnDrawFailResult()
+    {
+        resultTimer = config.resultTimeSec;
+        resultPopup.SetActive(true);
+        resultPopup.GetComponent<Image>().sprite = resultSprite[1];
+    }
+    
     // TODO: 물살 단계 표시
-    void OnCurrentChanged(CurrentLevel level) {
+    void OnWaveChanged(WaveLevel level) {
         Debug.Log($"CurrentChange:{level}");
         for(int i = 0; i<currentObj.Length; i++)
         {
@@ -158,9 +166,9 @@ public class PlayHud : MonoBehaviour
 
     void OnRoundStarted()
     {
-        sharkSlots[0].sprite = fishTable.Get(score.SharkGoal[0]).icon;
-        sharkSlots[1].sprite = fishTable.Get(score.SharkGoal[1]).icon;
-        sharkSlots[2].sprite = fishTable.Get(score.SharkGoal[2]).icon;
+        sharkSlots[0].sprite = fishTable.Get(shark.SharkGoal[0]).icon;
+        sharkSlots[1].sprite = fishTable.Get(shark.SharkGoal[1]).icon;
+        sharkSlots[2].sprite = fishTable.Get(shark.SharkGoal[2]).icon;
         sharkCheck[0].gameObject.SetActive(false);
         sharkCheck[1].gameObject.SetActive(false);
         sharkCheck[2].gameObject.SetActive(false);

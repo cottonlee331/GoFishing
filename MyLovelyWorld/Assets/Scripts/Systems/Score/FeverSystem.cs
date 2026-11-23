@@ -17,10 +17,9 @@ public class FeverSystem : MonoBehaviour
 
     float feverGaugeMult = 1;
 
-    public void OnCatchResult(CatchOutcome outcome, SizeClass size)
+    public void AddFeverGuage(SizeClass size)
     {
         if (IsFever) return;
-        if (outcome != CatchOutcome.Success) return;
 
         Gauge += sizeTable.Get(size).gaugeGain*feverGaugeMult;
         GaugeChanged?.Invoke(Gauge);
@@ -30,10 +29,10 @@ public class FeverSystem : MonoBehaviour
         }
     }
 
-    void Update()
+    public void Tick(float dt)
     {
         if (IsFever){
-            FeverRemaining -= Time.unscaledDeltaTime;
+            FeverRemaining -= dt;
             if (FeverRemaining <= 0)
             {
                 EndFever();

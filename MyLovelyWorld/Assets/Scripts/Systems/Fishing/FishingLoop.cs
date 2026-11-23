@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +8,6 @@ public class FishingLoop : MonoBehaviour
     [SerializeField] GameConfigSO config;
     [SerializeField] SizeTableSO sizeTable;
     [SerializeField] FishTableSO fishTable;
-    [SerializeField] FeverSystem feverSystem;
 
     [Header("Debug (read only)")]
     [SerializeField] FishingState state;
@@ -17,27 +15,31 @@ public class FishingLoop : MonoBehaviour
 
     public FishingState State => state;
     public BiteInfo CurrentBite { get; private set; }
+    public WaveLevel CurrentWave {get; private set;}
+    public JudgeInputQueue judgeQueue{get; private set;}
 
-    public CurrentLevel CurrentWave {get; private set;}
-
+    // Events
     public event Action<BiteInfo> BiteStarted;                    // → S2, UI
     public event Action<BiteInfo, JudgeResult> CatchResolved;     // → S5, S6, UI
-    public event Action<CurrentLevel> CurrentChanged;
+    public event Action<WaveLevel> WaveChanged;
 
-    JudgeModule judge;
+    JudgeModule judgeModule;
     BiteGenerator generator;
     bool isShark = false;   // 다음 입질이 청상아리
+    bool isFever = false;
     float judgeTime;
     float biteWaitMult;
     float ignoreProb;
 
     void Awake()
     {
-        judge = new JudgeModule();
+        judgeModule = new JudgeModule(config,ignoreProb);
         judgeTime = config.judgeTimeSec;
         biteWaitMult = 1;
         ignoreProb = 0;
         generator = new BiteGenerator(sizeTable, fishTable);
+        judgeQueue = new JudgeInputQueue();
+        judgeQueue.Open();
     }
 
     void Update()
@@ -61,6 +63,7 @@ public class FishingLoop : MonoBehaviour
                 break;
             case FishingState.Biting:
                 stateTimer -= dt;
+                if(stateTimer<=0) Judge();
                 break;
             case FishingState.Resolved:
                 // TODO: 결과 표시 시간 후 → Casting
@@ -82,7 +85,7 @@ public class FishingLoop : MonoBehaviour
                 break;
             case FishingState.Biting:
                 stateTimer = judgeTime;
-                // 스킬에 의한 연장 가능성은 추후 구현
+                judgeQueue.Open();
                 break;
             default:
                 stateTimer = 0;
@@ -93,18 +96,24 @@ public class FishingLoop : MonoBehaviour
     }
 
     void SetBite(){
-        if(feverSystem.IsFever) biteWaitMult *= config.feverWaitMult;
-        CurrentBite = generator.Generate(biteWaitMult,isShark);
+        float mult = biteWaitMult;
+        if(isFever) mult *= config.feverWaitMult;
+        CurrentBite = generator.Generate(mult,isShark);
         isShark = false;
     }
 
-    public void Judge(JudgeContext context){
+    public void Judge(){
         if(state != FishingState.Biting) return;
-        context.currentLevel = CurrentWave;
-        context.duringFever = feverSystem.IsFever;
+
+        // 새 Judge Context 셋팅
+        JudgeContext context = default;
+        context.waveLevel = CurrentWave;
         context.sizeClass = CurrentBite.size;
-        CatchResolved?.Invoke(CurrentBite, judge.Judge(context,ignoreProb));
+        (context.waveKey, context.sizeKey) = judgeQueue.Peek();
+
+        CatchResolved?.Invoke(CurrentBite, judgeModule.Judge(context));
         ChangeState(FishingState.Resolved);
+        judgeQueue.Close();
     }
 
     // TODO: 라운드 종료 시 호출. 진행 중 입질을 점수 없이 취소하고 루프 정지 (S1)
@@ -124,21 +133,16 @@ public class FishingLoop : MonoBehaviour
         if(skillEffects.ContainsKey(EffectKey.MShareMult)) generator.SetSizeShareMult(SizeClass.Medium,skillEffects[EffectKey.MShareMult]);
         if(skillEffects.ContainsKey(EffectKey.SShareMult)) generator.SetSizeShareMult(SizeClass.Small,skillEffects[EffectKey.SShareMult]);
         if(skillEffects.ContainsKey(EffectKey.MLShareMult)) generator.SetSizeShareMult(SizeClass.Medium,SizeClass.Large,skillEffects[EffectKey.MLShareMult]);
-
     }
     public void Begin(){
         ChangeState(FishingState.Casting);
         OnWaveChange();
     }
     public void OnWaveChange(){
-        CurrentWave = (CurrentLevel)UnityEngine.Random.Range(0, 3);
-        CurrentChanged?.Invoke(CurrentWave);
+        CurrentWave = (WaveLevel)UnityEngine.Random.Range(0, 3);
+        WaveChanged?.Invoke(CurrentWave);
     }
-    public void SetNextBiteShark(){
-        isShark = true;
-    }
-
-    public (float,float) GetBiteTimer(){
-        return (stateTimer,judgeTime);
-    }
+    public void SetNextBiteShark() => isShark = true;
+    public float GetBiteTimer() => stateTimer/judgeTime;
+    public void SetFever(bool isFever) => this.isFever = isFever;
 }

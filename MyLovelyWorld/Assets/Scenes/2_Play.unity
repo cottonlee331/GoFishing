@@ -783,6 +783,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 231641813}
   m_CullTransparentMesh: 1
+--- !u!1 &231981304
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 231981305}
+  - component: {fileID: 231981306}
+  m_Layer: 0
+  m_Name: SharkSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &231981305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 231981304}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 460581499}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &231981306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 231981304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3087bc9b497a17d4d8691ee4352124eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SharkSystem
+  fishTable: {fileID: 11400000, guid: d5c695d6195f00c4eaa18fdf37e7d96c, type: 2}
 --- !u!1 &246932905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1542,6 +1587,7 @@ Transform:
   - {fileID: 2145038878}
   - {fileID: 746798266}
   - {fileID: 53686405}
+  - {fileID: 231981305}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &508459803
@@ -3706,6 +3752,7 @@ MonoBehaviour:
   score: {fileID: 2145038879}
   fever: {fileID: 53686406}
   loop: {fileID: 746798267}
+  shark: {fileID: 231981306}
   fishTable: {fileID: 11400000, guid: d5c695d6195f00c4eaa18fdf37e7d96c, type: 2}
   skillTable: {fileID: 11400000, guid: cce39082e14cf6747ba6ff5407fb80e9, type: 2}
   config: {fileID: 11400000, guid: b351440eb454ca14c86f383cdb63fe3e, type: 2}
@@ -6886,6 +6933,7 @@ MonoBehaviour:
   fishingLoop: {fileID: 746798267}
   feverSystem: {fileID: 53686406}
   scoreSystem: {fileID: 2145038879}
+  sharkSystem: {fileID: 231981306}
   state: 0
 --- !u!1 &1788210253
 GameObject:
@@ -8560,8 +8608,6 @@ MonoBehaviour:
   config: {fileID: 11400000, guid: b351440eb454ca14c86f383cdb63fe3e, type: 2}
   fishTable: {fileID: 11400000, guid: d5c695d6195f00c4eaa18fdf37e7d96c, type: 2}
   sizeTable: {fileID: 11400000, guid: a58a60e4d3d7ba9448b767e3a556ec32, type: 2}
-  loop: {fileID: 746798267}
-  feverSystem: {fileID: 53686406}
 --- !u!1001 &1109624165028163227
 PrefabInstance:
   m_ObjectHideFlags: 0
