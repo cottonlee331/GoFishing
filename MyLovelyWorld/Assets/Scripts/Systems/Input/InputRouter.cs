@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 // S10. 키보드와 화면 버튼 입력을 같은 이벤트로 합친다.
 // 입력을 받을지 말지(입질 중인지, 확정 직후 잠금인지)는 FishingLoop가 판단한다.
@@ -14,9 +13,9 @@ public class InputRouter : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space)) EmitConfirm();
 
-        if (Input.GetKey(KeyCode.A)) EmitJudgeKey(JudgeKey.Power);
-        if (Input.GetKey(KeyCode.S)) EmitJudgeKey(JudgeKey.Steady);
-        if (Input.GetKey(KeyCode.D)) EmitJudgeKey(JudgeKey.Delicate);
+        if (Input.GetKeyDown(KeyCode.A)) EmitJudgeKey(JudgeKey.Power);
+        if (Input.GetKeyDown(KeyCode.S)) EmitJudgeKey(JudgeKey.Steady);
+        if (Input.GetKeyDown(KeyCode.D)) EmitJudgeKey(JudgeKey.Delicate);
     }
 
     // 화면 버튼 OnClick 연결용. 0=강력, 1=무난, 2=섬세 (JudgeKey 순서)
